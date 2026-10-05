@@ -41,51 +41,24 @@ class MainActivity : AppCompatActivity() {
         webView.isHapticFeedbackEnabled = true
         webView.setOnLongClickListener { true }
 
+        // Fallback native dialogs (used only if JS-side dialogs aren't available)
         webView.webChromeClient = object : WebChromeClient() {
-
-            override fun onJsAlert(
-                view: WebView?, url: String?, message: String?,
-                result: JsResult?
-            ): Boolean {
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("DroidCraft")
-                    .setMessage(message)
-                    .setPositiveButton("OK") { _, _ -> result?.confirm() }
-                    .setCancelable(false)
-                    .show()
+            override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message)
+                    .setPositiveButton("OK") { _, _ -> result?.confirm() }.setCancelable(false).show()
                 return true
             }
-
-            override fun onJsConfirm(
-                view: WebView?, url: String?, message: String?,
-                result: JsResult?
-            ): Boolean {
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("DroidCraft")
-                    .setMessage(message)
+            override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message)
                     .setPositiveButton("OK") { _, _ -> result?.confirm() }
-                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }
-                    .setCancelable(false)
-                    .show()
+                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }.setCancelable(false).show()
                 return true
             }
-
-            override fun onJsPrompt(
-                view: WebView?, url: String?, message: String?,
-                defaultValue: String?, result: JsPromptResult?
-            ): Boolean {
-                val input = EditText(this@MainActivity).apply {
-                    setText(defaultValue ?: "")
-                    setSelection(text.length)
-                }
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("DroidCraft")
-                    .setMessage(message)
-                    .setView(input)
+            override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult?): Boolean {
+                val input = EditText(this@MainActivity).apply { setText(defaultValue ?: ""); setSelection(text.length) }
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message).setView(input)
                     .setPositiveButton("OK") { _, _ -> result?.confirm(input.text.toString()) }
-                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }
-                    .setCancelable(false)
-                    .show()
+                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }.setCancelable(false).show()
                 return true
             }
         }
@@ -95,10 +68,12 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        // Ask JS. JS returns true if it handled the back press internally.
         webView.evaluateJavascript(
             "(function(){ return window.handleBackButton ? window.handleBackButton() : false; })()"
         ) { result ->
-            if (result != "true") {
+            val clean = result?.replace("\"", "") ?: ""
+            if (clean != "true") {
                 @Suppress("DEPRECATION")
                 super.onBackPressed()
             }
