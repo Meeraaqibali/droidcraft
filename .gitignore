@@ -1,10 +1,20 @@
-node_modules/
-*.log
+# Android
+*.apk
+*.aab
 build/
 .gradle/
-*.apk
+local.properties
+.idea/
+*.iml
+
+# Node
+node_modules/
+*.log
+
+# Keystores (NEVER commit!)
 *.keystore
 *.jks
+
+# OS
 .DS_Store
 Thumbs.db
-id_ed25519*
