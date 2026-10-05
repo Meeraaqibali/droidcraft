@@ -758,6 +758,51 @@
   .social-btn.brand-facebook:hover { border-color: #1877F2; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.2); }
   .social-btn.brand-github:hover { border-color: #181717; box-shadow: 0 4px 14px rgba(24, 23, 23, 0.2); }
 
+
+  /* ========== BIGGER EMOJI PICKER ========== */
+  .avatar-emoji-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 0 4px;
+  }
+  .avatar-emoji-btn {
+    width: 100% !important;
+    aspect-ratio: 1 / 1;
+    height: auto !important;
+    border-radius: 16px !important;
+    font-size: 34px !important;
+    line-height: 1;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface) !important;
+    border: 2px solid var(--border) !important;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.04);
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.2s,
+                background 0.2s,
+                box-shadow 0.25s;
+  }
+  .avatar-emoji-btn:active {
+    transform: scale(0.9);
+  }
+  .avatar-emoji-btn.selected {
+    border-color: var(--primary) !important;
+    background: var(--primary-light) !important;
+    transform: scale(1.06);
+    box-shadow: 0 6px 16px rgba(79,70,229,0.3);
+  }
+
+  /* Reduce avatar glow since emojis are bigger now */
+  .profile-avatar-large {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 42px !important;
+    margin-bottom: 14px !important;
+  }
 </style>
 </head>
 <body>
