@@ -3,6 +3,7 @@ package com.droidcraft.builder
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
+import android.webkit.JsPromptResult
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onJsPrompt(
                 view: WebView?, url: String?, message: String?,
-                defaultValue: String?, result: JsResult?
+                defaultValue: String?, result: JsPromptResult?
             ): Boolean {
                 val input = EditText(this@MainActivity).apply {
                     setText(defaultValue ?: "")
