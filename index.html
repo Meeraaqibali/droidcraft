@@ -766,60 +766,81 @@
 <div id="auth-screen" class="screen active">
   <div class="auth-container">
     <div class="auth-header">
-      <svg class="logo-svg lg" viewBox="0 0 48 48">
+      <svg class="logo-svg lg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#E0E7FF"/></linearGradient></defs>
-        <circle cx="24" cy="6" r="3" fill="#EC4899"/><rect x="23" y="8" width="2" height="5" fill="#EC4899"/>
+        <circle cx="24" cy="6" r="3" fill="#EC4899"/>
+        <rect x="23" y="8" width="2" height="5" fill="#EC4899"/>
         <rect x="4" y="12" width="40" height="32" rx="10" fill="url(#lg1)"/>
         <circle cx="16" cy="26" r="4" fill="#4F46E5"/><circle cx="32" cy="26" r="4" fill="#4F46E5"/>
         <circle cx="16" cy="26" r="2" fill="#1F2937"/><circle cx="32" cy="26" r="2" fill="#1F2937"/>
         <rect x="18" y="35" width="12" height="2.5" rx="1.25" fill="#4F46E5"/>
-        <rect x="2" y="22" width="3" height="12" rx="1.5" fill="#EC4899"/><rect x="43" y="22" width="3" height="12" rx="1.5" fill="#EC4899"/>
+        <rect x="2" y="22" width="3" height="12" rx="1.5" fill="#EC4899"/>
+        <rect x="43" y="22" width="3" height="12" rx="1.5" fill="#EC4899"/>
       </svg>
-      <h1>DroidCraft</h1><p>Design. Build. Ship Android apps.</p>
+      <h1>DroidCraft</h1>
+      <p>Design. Build. Ship Android apps.</p>
     </div>
+
     <div class="quick-login" id="quick-login-section" style="display:none;">
       <div class="quick-login-title">Quick Login</div>
       <div class="quick-accounts" id="quick-accounts"></div>
     </div>
+
     <div class="auth-card">
       <div class="auth-tabs">
         <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
         <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
       </div>
+
       <div class="auth-form active" id="form-login">
         <div class="error-msg" id="login-error"></div>
-        <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="login-email" placeholder="Email address"></div>
-        <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="login-password" placeholder="Password"><button class="toggle-password" onclick="togglePassword('login-password', this)">👁</button></div>
-        <div class="auth-row"><label class="checkbox-wrap"><input type="checkbox" id="remember-me" checked> Remember me</label><span class="forgot-link" onclick="forgotPassword()">Forgot?</span></div>
-        <button class="btn-primary" onclick="doLogin()">Login →</button>
-          <div class="divider">OR CONTINUE WITH</div>
-          <div class="social-buttons">
-            <button class="social-btn brand-google" onclick="socialLogin('Google')" aria-label="Continue with Google">
-              <svg viewBox="0 0 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
-            </button>
-            <button class="social-btn brand-facebook" onclick="socialLogin('Facebook')" aria-label="Continue with Facebook">
-              <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </button>
-            <button class="social-btn brand-github" onclick="socialLogin('GitHub')" aria-label="Continue with GitHub">
-              <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-            </button>
-          </div>
-        
+        <div class="input-wrapper"><span class="input-icon">&#128231;</span><input type="email" id="login-email" placeholder="Email address"></div>
+        <div class="input-wrapper"><span class="input-icon">&#128274;</span><input type="password" id="login-password" placeholder="Password"><button class="toggle-password" onclick="togglePassword('login-password', this)">&#128065;</button></div>
+        <div class="auth-row">
+          <label class="checkbox-wrap"><input type="checkbox" id="remember-me" checked> Remember me</label>
+          <span class="forgot-link" onclick="forgotPassword()">Forgot?</span>
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Login &rarr;</button>
+        <div class="divider">OR CONTINUE WITH</div>
+        <div class="social-buttons">
+          <button type="button" class="social-btn brand-google" onclick="socialLogin('Google')" aria-label="Google">
+            <svg viewBox="0 0 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+              <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+              <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+              <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+            </svg>
+          </button>
+          <button type="button" class="social-btn brand-facebook" onclick="socialLogin('Facebook')" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </button>
+          <button type="button" class="social-btn brand-github" onclick="socialLogin('GitHub')" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="auth-form" id="form-signup">
         <div class="error-msg" id="signup-error"></div>
-        <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="signup-name" placeholder="Full name" maxlength="30"></div>
-        <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="signup-email" placeholder="Email address"></div>
-        <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="signup-password" placeholder="Password (min 6 chars)"><button class="toggle-password" onclick="togglePassword('signup-password', this)">👁</button></div>
-        <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="signup-confirm" placeholder="Confirm password"><button class="toggle-password" onclick="togglePassword('signup-confirm', this)">👁</button></div>
-        <div class="auth-row"><label class="checkbox-wrap"><input type="checkbox" id="signup-terms" checked> I agree to Terms</label></div>
-        <button class="btn-primary" onclick="doSignup()">Create Account →</button>
+        <div class="input-wrapper"><span class="input-icon">&#128100;</span><input type="text" id="signup-name" placeholder="Full name" maxlength="30"></div>
+        <div class="input-wrapper"><span class="input-icon">&#128231;</span><input type="email" id="signup-email" placeholder="Email address"></div>
+        <div class="input-wrapper"><span class="input-icon">&#128274;</span><input type="password" id="signup-password" placeholder="Password (min 6 characters)"><button class="toggle-password" onclick="togglePassword('signup-password', this)">&#128065;</button></div>
+        <div class="input-wrapper"><span class="input-icon">&#128274;</span><input type="password" id="signup-confirm" placeholder="Confirm password"><button class="toggle-password" onclick="togglePassword('signup-confirm', this)">&#128065;</button></div>
+        <div class="auth-row">
+          <label class="checkbox-wrap"><input type="checkbox" id="signup-terms" checked> I agree to the Terms</label>
+        </div>
+        <button class="btn-primary" onclick="doSignup()">Create Account &rarr;</button>
       </div>
     </div>
-    <div class="auth-footer">Made with ❤️ for mobile builders</div>
+
+    <div class="auth-footer">Made with <span style="color:#EC4899;">&#10084;</span> for mobile builders</div>
   </div>
 </div>
 
-<!-- HOME -->
 <div id="home-screen" class="screen">
   <div class="app-header">
     <div class="header-title">
@@ -2911,9 +2932,7 @@ function openHelp() {
 var _helpReturnScreen = 'home-screen';
 function closeHelp() { showScreen(_helpReturnScreen); }
 
-function socialLogin(provider) {
-  alert(provider + " Sign-In will be available soon. For now please use your email and password.");
-}
+
 </script>
 
 <div id="help-screen" class="screen">
@@ -3115,5 +3134,11 @@ function socialLogin(provider) {
   </div>
 </div>
 
+
+<script>
+function socialLogin(provider) {
+  alert(provider + " Sign-In will be available soon. For now please use your email and password.");
+}
+</script>
 </body>
 </html>
