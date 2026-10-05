@@ -1,9 +1,14 @@
 package com.droidcraft.builder
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.os.Bundle
-import android.webkit.WebView
+import android.view.HapticFeedbackConstants
+import android.webkit.JsResult
+import android.webkit.WebChromeClient
 import android.webkit.WebSettings
+import android.webkit.WebView
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -30,17 +35,76 @@ class MainActivity : AppCompatActivity() {
         settings.displayZoomControls = false
         settings.mediaPlaybackRequiresUserGesture = false
         settings.setSupportZoom(false)
+        settings.javaScriptCanOpenWindowsAutomatically = true
+
+        // Prevent long-press text selection so drag works
+        webView.isLongClickable = false
+        webView.isHapticFeedbackEnabled = true
+        webView.setOnLongClickListener { true }
+
+        // Handle alert(), confirm(), prompt() with native Android dialogs
+        webView.webChromeClient = object : WebChromeClient() {
+
+            override fun onJsAlert(
+                view: WebView?, url: String?, message: String?,
+                result: JsResult?
+            ): Boolean {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("DroidCraft")
+                    .setMessage(message)
+                    .setPositiveButton("OK") { _, _ -> result?.confirm() }
+                    .setCancelable(false)
+                    .show()
+                return true
+            }
+
+            override fun onJsConfirm(
+                view: WebView?, url: String?, message: String?,
+                result: JsResult?
+            ): Boolean {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("DroidCraft")
+                    .setMessage(message)
+                    .setPositiveButton("OK") { _, _ -> result?.confirm() }
+                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }
+                    .setCancelable(false)
+                    .show()
+                return true
+            }
+
+            override fun onJsPrompt(
+                view: WebView?, url: String?, message: String?,
+                defaultValue: String?, result: JsResult?
+            ): Boolean {
+                val input = EditText(this@MainActivity).apply {
+                    setText(defaultValue ?: "")
+                    setSelection(text.length)
+                }
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("DroidCraft")
+                    .setMessage(message)
+                    .setView(input)
+                    .setPositiveButton("OK") { _, _ -> result?.confirm(input.text.toString()) }
+                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }
+                    .setCancelable(false)
+                    .show()
+                return true
+            }
+        }
 
         webView.loadUrl("file:///android_asset/index.html")
     }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
+        // Ask JavaScript if it wants to handle the back press
+        webView.evaluateJavascript(
+            "(function(){ return window.handleBackButton ? window.handleBackButton() : false; })()"
+        ) { result ->
+            if (result != "true") {
+                @Suppress("DEPRECATION")
+                super.onBackPressed()
+            }
         }
     }
 }

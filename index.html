@@ -162,7 +162,7 @@
   #editor-screen { padding: 0; }
   .screens-bar { background: var(--surface); padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
   .screens-bar::-webkit-scrollbar { display: none; }
-  .screen-tab-wrap { position: relative; display: flex; align-items: center; flex: 0 0 auto; touch-action: none; }
+  .screen-tab-wrap { position: relative; display: flex; align-items: center; flex: 0 0 auto; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
   .screen-tab { padding: 8px 30px 8px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; user-select: none; -webkit-user-select: none; }
   .screen-tab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(79,70,229,0.3); }
   .screen-tab .start-icon { font-size: 10px; }
@@ -1757,6 +1757,15 @@ function applyCodeChanges() {
   saveCurrentProject();
   closeModal(null, 'code-modal-overlay');
 }
+
+/* Android back button handler */
+window.handleBackButton = function() {
+  var openModal = document.querySelector('.modal-overlay.active');
+  if (openModal) { closeModal(null, openModal.id); return true; }
+  var editorScreen = document.getElementById('editor-screen');
+  if (editorScreen && editorScreen.classList.contains('active')) { showHome(); return true; }
+  return false;
+};
 
 window.addEventListener('beforeunload', saveCurrentProject);
 </script>
