@@ -3,7 +3,6 @@ package com.droidcraft.builder
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
-import android.view.HapticFeedbackConstants
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -37,12 +36,10 @@ class MainActivity : AppCompatActivity() {
         settings.setSupportZoom(false)
         settings.javaScriptCanOpenWindowsAutomatically = true
 
-        // Prevent long-press text selection so drag works
         webView.isLongClickable = false
         webView.isHapticFeedbackEnabled = true
         webView.setOnLongClickListener { true }
 
-        // Handle alert(), confirm(), prompt() with native Android dialogs
         webView.webChromeClient = object : WebChromeClient() {
 
             override fun onJsAlert(
@@ -97,7 +94,6 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        // Ask JavaScript if it wants to handle the back press
         webView.evaluateJavascript(
             "(function(){ return window.handleBackButton ? window.handleBackButton() : false; })()"
         ) { result ->
