@@ -7,3 +7,4 @@ build/
 *.jks
 .DS_Store
 Thumbs.db
+id_ed25519*
