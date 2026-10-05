@@ -402,6 +402,56 @@
   .project-item:active { transform: scale(0.985); }
   .custom-toast { transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) !important; }
 
+
+  /* ========== PREMIUM BACK BUTTON ========== */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, box-shadow 0.2s ease;
+    padding: 0;
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+  }
+  .back-btn:active {
+    transform: scale(0.9);
+    background: var(--primary-light);
+  }
+  .back-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .back-btn:active svg {
+    transform: translateX(-3px);
+  }
+  body.dark .back-btn {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+  body.dark .back-btn svg { stroke: var(--text); }
+
+
+  .screen-tab-wrap, .screen-tab {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+  .screen-tab-wrap * { pointer-events: none; }
+  .screen-tab-wrap .tab-menu { pointer-events: auto; }
 </style>
 </head>
 <body>
@@ -473,6 +523,7 @@
       <h1>Droid<span>Craft</span></h1>
     </div>
     <div class="header-group">
+      <button class="icon-btn" onclick="openHelp()" style="font-weight:800;">?</button>
       <button class="icon-btn" onclick="openBuilderSettings()">⚙️</button>
       <button class="icon-btn avatar-btn" id="home-avatar" onclick="openAccountModal()">A</button>
     </div>
@@ -561,12 +612,14 @@
 <div id="editor-screen" class="screen">
   <div class="app-header">
     <div class="header-group">
-      <button class="icon-btn" onclick="showHome()">←</button>
+      <button class="back-btn" onclick="showHome()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button class="icon-btn" onclick="openAppSettings()">🎨</button>
     </div>
     <h1 id="editor-project-name" style="font-size: 14px; font-weight: 700; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Untitled</h1>
     <div class="header-group">
-      <button class="text-btn" onclick="openCodeModal()">&lt;/&gt;</button>
+      <button class="icon-btn" onclick="openHelp()" style="font-weight:800;">?</button>
+      <button class="icon-btn" onclick="openCodeModal()" title="Code">&lt;/&gt;</button>
+      <button class="text-btn" onclick="openPublishModal()">📦 Publish</button>
     </div>
   </div>
   <div class="screens-bar">
@@ -993,8 +1046,32 @@ function openAccountModal() {
 function editAccountName() { closeModal(null, 'account-modal'); openProfileScreen(); }
 
 /* NAVIGATION */
-function showHome() {
+async function showHome() {
+  var hasDraft = (currentProjectId === null) && (typeof projectScreens !== 'undefined') && projectScreens.length > 0;
+  var hasContent = false;
+  if (hasDraft) {
+    var placedCount = document.querySelectorAll('#canvas .placed').length;
+    hasContent = placedCount > 0 || projectScreens.length > 1;
+  }
+  if (hasContent) {
+    var shouldSave = false;
+    if (typeof customConfirm === 'function') {
+      shouldSave = await customConfirm('Save your changes before leaving?', {
+        title: 'Unsaved Changes',
+        icon: '💾',
+        okText: 'Save',
+        cancelText: 'Discard'
+      });
+    } else {
+      shouldSave = confirm('Save your changes before leaving?');
+    }
+    if (shouldSave) {
+      await saveProjectExplicitly();
+      if (currentProjectId === null) return;
+    }
+  }
   saveCurrentProject();
+  currentProjectId = null;
   showScreen('home-screen');
   renderProjects();
 }
@@ -1048,15 +1125,48 @@ function timeAgo(ts) {
   return Math.floor(hr / 24) + ' days ago';
 }
 function createNewProject() {
-  const projects = getProjects();
-  const id = 'proj_' + Date.now();
+  // DRAFT MODE: not saved until user taps 💾
+  currentProjectId = null;
+  projectScreens = [{ id: 'screen_' + Date.now(), name: 'Main', appBarTitle: 'My Application', state: [] }];
+  currentScreenIndex = 0;
+  pendingColor = '#6200EE';
+  document.documentElement.style.setProperty('--android-primary', pendingColor);
+  document.getElementById('editor-project-name').textContent = 'Untitled Draft';
+  renderScreensBar();
+  loadScreenIntoCanvas(0);
+  showScreen('editor-screen');
+  if (typeof showToast === 'function') showToast('Draft mode — tap 💾 to save');
+}
+
+async function saveProjectExplicitly() {
+  if (currentProjectId) {
+    saveCurrentProject();
+    if (typeof showToast === 'function') showToast('Saved ✓');
+    return;
+  }
+  var name;
+  if (typeof customPrompt === 'function') {
+    name = await customPrompt('Name your app:', 'My App', { title: 'Save Project', icon: '💾', okText: 'Save' });
+  } else {
+    name = prompt('Name your app:', 'My App');
+  }
+  if (!name || !name.trim()) return;
+
+  saveCurrentScreenState();
+  var projects = getProjects();
+  var id = 'proj_' + Date.now();
   projects.push({
-    id, name: 'Untitled App', theme: '#6200EE',
-    screens: [{ id: 'screen_' + Date.now(), name: 'Main', appBarTitle: 'My Application', state: [] }],
+    id: id,
+    name: name.trim(),
+    theme: pendingColor,
+    screens: JSON.parse(JSON.stringify(projectScreens)),
     updatedAt: Date.now()
   });
   setProjects(projects);
-  openProject(id);
+  currentProjectId = id;
+  document.getElementById('editor-project-name').textContent = name.trim();
+  document.getElementById('app-bar').textContent = projectScreens[0].appBarTitle || name.trim();
+  if (typeof showToast === 'function') showToast('Project saved ✓');
 }
 function openProject(id) {
   const project = getProjects().find(p => p.id === id);
@@ -1164,81 +1274,113 @@ async function addNewScreen() {
 
 /* DRAG TO REORDER — FIXED */
 function setupTabDrag(wrap, index) {
-  let longPressTimer = null, startX = 0, startY = 0;
-  let isDragging = false, ghost = null;
-  let fromIndex = index, toIndex = index;
+  var longPressTimer = null;
+  var startX = 0, startY = 0;
+  var isDragging = false;
+  var ghost = null;
+  var fromIndex = index, toIndex = index;
+  var pressed = false;
 
-  wrap.addEventListener('touchstart', (e) => {
+  function vibrate(ms) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch(e) {}
+  }
+
+  function onStart(e) {
     if (e.target.closest('.tab-menu')) return;
-    const t = e.touches[0];
-    startX = t.clientX; startY = t.clientY;
-    fromIndex = index; toIndex = index;
-    const rect = wrap.getBoundingClientRect();
-    longPressTimer = setTimeout(() => {
-      isDragging = true; suppressTabClick = true;
-      if (navigator.vibrate) navigator.vibrate(20);
+    var t = e.touches ? e.touches[0] : e;
+    startX = t.clientX;
+    startY = t.clientY;
+    fromIndex = index;
+    toIndex = index;
+    pressed = true;
+    var rect = wrap.getBoundingClientRect();
+
+    longPressTimer = setTimeout(function() {
+      if (!pressed) return;
+      isDragging = true;
+      suppressTabClick = true;
+      vibrate(25);
       ghost = wrap.cloneNode(true);
       ghost.classList.add('drag-ghost');
       ghost.style.position = 'fixed';
       ghost.style.left = rect.left + 'px';
       ghost.style.top = rect.top + 'px';
       ghost.style.width = rect.width + 'px';
+      ghost.style.zIndex = '99999';
+      ghost.style.pointerEvents = 'none';
       ghost.style.transition = 'transform 0.05s ease-out';
       document.body.appendChild(ghost);
-      wrap.style.opacity = '0.3';
-      localStorage.setItem('droidCraftHintDismissed', '1');
-    }, 400);
-  }, { passive: true });
+      wrap.style.opacity = '0.35';
+      try { localStorage.setItem('droidCraftHintDismissed', '1'); } catch(e) {}
+    }, 380);
+  }
 
-  wrap.addEventListener('touchmove', (e) => {
-    const t = e.touches[0];
+  function onMove(e) {
+    if (!pressed) return;
+    var t = e.touches ? e.touches[0] : e;
     if (!isDragging) {
-      if (Math.abs(t.clientX - startX) > 8 || Math.abs(t.clientY - startY) > 8) clearTimeout(longPressTimer);
+      if (Math.abs(t.clientX - startX) > 8 || Math.abs(t.clientY - startY) > 8) {
+        clearTimeout(longPressTimer);
+      }
       return;
     }
-    e.preventDefault();
-    const dx = t.clientX - startX;
-    ghost.style.transform = `translateX(${dx}px) scale(1.08) rotate(1.5deg)`;
-    const tabs = Array.from(document.querySelectorAll('.screen-tab-wrap'));
-    const fingerX = t.clientX;
-    let overIndex = -1;
-    tabs.forEach((tab, i) => {
-      const r = tab.getBoundingClientRect();
+    if (e.cancelable) e.preventDefault();
+    var dx = t.clientX - startX;
+    if (ghost) ghost.style.transform = 'translateX(' + dx + 'px) scale(1.08) rotate(1.5deg)';
+
+    var tabs = Array.from(document.querySelectorAll('.screen-tab-wrap'));
+    var fingerX = t.clientX;
+    var overIndex = -1;
+    tabs.forEach(function(tab, i) {
+      var r = tab.getBoundingClientRect();
       if (fingerX >= r.left && fingerX <= r.right) overIndex = i;
     });
     if (tabs.length > 0) {
-      const firstR = tabs[0].getBoundingClientRect();
-      const lastR = tabs[tabs.length - 1].getBoundingClientRect();
+      var firstR = tabs[0].getBoundingClientRect();
+      var lastR = tabs[tabs.length - 1].getBoundingClientRect();
       if (fingerX < firstR.left) overIndex = 0;
       if (fingerX > lastR.right) overIndex = tabs.length - 1;
     }
-    tabs.forEach((tab, i) => tab.classList.toggle('drag-over', i === overIndex && i !== fromIndex));
+    tabs.forEach(function(tab, i) {
+      if (i === overIndex && i !== fromIndex) tab.classList.add('drag-over');
+      else tab.classList.remove('drag-over');
+    });
     if (overIndex >= 0) toIndex = overIndex;
-  }, { passive: false });
+  }
 
-  const finish = () => {
+  function onEnd() {
     clearTimeout(longPressTimer);
+    pressed = false;
     if (!isDragging) return;
     isDragging = false;
-    if (ghost) ghost.remove();
+    if (ghost) { ghost.remove(); ghost = null; }
     wrap.style.opacity = '';
-    ghost = null;
-    document.querySelectorAll('.screen-tab-wrap').forEach(t => t.classList.remove('drag-over'));
-    const from = fromIndex, to = toIndex;
-    setTimeout(() => { suppressTabClick = false; }, 300);
+    document.querySelectorAll('.screen-tab-wrap').forEach(function(t) {
+      t.classList.remove('drag-over');
+    });
+    var from = fromIndex, to = toIndex;
+    setTimeout(function() { suppressTabClick = false; }, 300);
     if (from !== to && to >= 0) {
       saveCurrentScreenState();
-      const [moved] = projectScreens.splice(from, 1);
+      var moved = projectScreens.splice(from, 1)[0];
       projectScreens.splice(to, 0, moved);
       currentScreenIndex = to;
       renderScreensBar();
       loadScreenIntoCanvas(to);
       saveCurrentProject();
-      if (navigator.vibrate) navigator.vibrate(30);
+      vibrate(35);
     }
-  };
-  wrap.addEventListener('touchend', finish);
-  wrap.addEventListener('touchcancel', finish);
+  }
+
+  wrap.addEventListener('touchstart', onStart, { passive: true });
+  wrap.addEventListener('touchmove', onMove, { passive: false });
+  wrap.addEventListener('touchend', onEnd);
+  wrap.addEventListener('touchcancel', onEnd);
+  // Mouse fallback for desktop testing
+  wrap.addEventListener('mousedown', onStart);
+  wrap.addEventListener('mousemove', onMove);
+  wrap.addEventListener('mouseup', onEnd);
+  wrap.addEventListener('mouseleave', onEnd);
 }
 
 /* SCREEN MENU */
@@ -1375,10 +1517,9 @@ function createFromTemplate(template) {
   }
 
   document.getElementById('app-bar').textContent = appBarTitle;
-  document.getElementById('editor-project-name').textContent = projName;
-  const projects = getProjects();
-  const proj = projects.find(p => p.id === currentProjectId);
-  if (proj) { proj.name = projName; proj.updatedAt = Date.now(); proj.screens = projectScreens; setProjects(projects); }
+  document.getElementById('editor-project-name').textContent = projName + ' (Draft)';
+  // DRAFT MODE: no auto-save
+  if (typeof showToast === 'function') showToast('Template loaded — tap 💾 to save');
 }
 
 /* BUILDER SETTINGS */
@@ -1897,7 +2038,7 @@ window.addEventListener('beforeunload', saveCurrentProject);
 <div id="profile-screen" class="screen">
   <div class="app-header">
     <div class="header-group">
-      <button class="icon-btn" onclick="showHome()">&#8592;</button>
+      <button class="back-btn" onclick="showHome()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
     </div>
     <h1 style="font-size: 16px; font-weight: 700; color: var(--text);">Edit Profile</h1>
     <div class="header-group" style="width: 40px;"></div>
@@ -2094,6 +2235,381 @@ async function deleteAccount() {
   renderQuickAccounts();
   showToast('Account deleted');
 }
+</script>
+
+
+<!-- ========== PUBLISH MODAL ========== -->
+<div class="modal-overlay" id="publish-modal" onclick="closeModal(event, 'publish-modal')">
+  <div class="bottom-panel" onclick="event.stopPropagation()">
+    <div class="panel-header"><h3>📦 Publish App</h3><button onclick="closeModal(null, 'publish-modal')">✕</button></div>
+
+    <div id="publish-options">
+      <div style="font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 16px;">
+        Turn your design into a real, installable Android APK.
+      </div>
+
+      <div class="template-card" style="text-align: left; padding: 18px; margin-bottom: 10px;" onclick="showPublishScript()">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 28px;">📱</span>
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 700; margin-bottom: 2px;">Build Real APK</div>
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">Get a Termux script that builds a real Android app</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="template-card" style="text-align: left; padding: 18px;" onclick="showPublishXML()">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 28px;">📄</span>
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 700; margin-bottom: 2px;">Export XML Only</div>
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">Just the layout files for developers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="publish-script-view" style="display: none;">
+      <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); margin-bottom: 12px;">
+        <b style="color: var(--text);">How to use:</b><br>
+        1. Tap <b style="color: var(--text);">Copy Script</b><br>
+        2. Open <b style="color: var(--text);">Termux</b> → long-press → Paste<br>
+        3. Press <b style="color: var(--text);">Enter</b><br>
+        4. Follow the printed instructions
+      </div>
+      <div class="form-group">
+        <label>Script</label>
+        <textarea id="publish-script-text" readonly style="height: 180px; font-family: monospace; font-size: 10px; line-height: 1.4;"></textarea>
+      </div>
+      <div class="panel-actions">
+        <button class="btn-danger" onclick="backToPublishOptions()">← Back</button>
+        <button class="btn-save" onclick="copyPublishScript(event)">📋 Copy Script</button>
+      </div>
+    </div>
+
+    <div id="publish-xml-view" style="display: none;">
+      <div class="form-group">
+        <label>XML Layout</label>
+        <textarea id="publish-xml-text" readonly style="height: 220px; font-family: monospace; font-size: 11px; line-height: 1.5;"></textarea>
+      </div>
+      <div class="panel-actions">
+        <button class="btn-danger" onclick="backToPublishOptions()">← Back</button>
+        <button class="btn-save" onclick="copyPublishXML(event)">📋 Copy XML</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+/* ========== PUBLISH ========== */
+function openPublishModal() {
+  saveCurrentScreenState();
+  document.getElementById('publish-options').style.display = 'block';
+  document.getElementById('publish-script-view').style.display = 'none';
+  document.getElementById('publish-xml-view').style.display = 'none';
+  document.getElementById('publish-modal').classList.add('active');
+}
+
+function backToPublishOptions() {
+  document.getElementById('publish-options').style.display = 'block';
+  document.getElementById('publish-script-view').style.display = 'none';
+  document.getElementById('publish-xml-view').style.display = 'none';
+}
+
+function showPublishXML() {
+  saveCurrentScreenState();
+  var full = '';
+  projectScreens.forEach(function(s, i) {
+    full += '<!-- SCREEN ' + (i+1) + ': ' + s.name + (i===0?' (START)':'') + ' -->\n';
+    full += generateXMLForScreen(s) + '\n\n';
+  });
+  document.getElementById('publish-xml-text').value = full;
+  document.getElementById('publish-options').style.display = 'none';
+  document.getElementById('publish-xml-view').style.display = 'block';
+}
+
+function copyPublishXML(e) {
+  var t = document.getElementById('publish-xml-text');
+  t.select(); t.setSelectionRange(0, 999999);
+  document.execCommand('copy');
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){});
+  var b = e ? e.target : event.target;
+  var o = b.textContent;
+  b.textContent = '✅ Copied!';
+  setTimeout(function(){ b.textContent = o; }, 1500);
+}
+
+function slugify(str) {
+  return String(str).toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/^[0-9]+/,'') || 'myapp';
+}
+
+function generateTermuxScript() {
+  var proj = getProjects().find(function(p){ return p.id === currentProjectId; });
+  var rawName = ((proj && proj.name) || 'My App').replace(/[^a-zA-Z0-9 ]/g,'').trim() || 'MyApp';
+  var projectName = rawName.replace(/\s+/g,'');
+  var pkgSlug = slugify(rawName);
+  var pkgName = 'com.droidcraft.' + pkgSlug;
+  var folderName = pkgSlug + '-app';
+
+  var xmlFiles = '';
+  projectScreens.forEach(function(s, i) {
+    var xml = generateXMLForScreen(s);
+    var layoutName = i === 0 ? 'activity_main' : 'activity_' + slugify(s.name);
+    xmlFiles += 'mkdir -p app/src/main/res/layout\n';
+    xmlFiles += "cat > app/src/main/res/layout/" + layoutName + ".xml << 'XEOF'\n" + xml + "\nXEOF\n\n";
+  });
+
+  var kotlin = 'package ' + pkgName + '\n\n' +
+    'import android.os.Bundle\n' +
+    'import androidx.appcompat.app.AppCompatActivity\n\n' +
+    'class MainActivity : AppCompatActivity() {\n' +
+    '    override fun onCreate(savedInstanceState: Bundle?) {\n' +
+    '        super.onCreate(savedInstanceState)\n' +
+    '        setContentView(R.layout.activity_main)\n' +
+    '    }\n' +
+    '}';
+
+  var pkgPath = pkgName.replace(/\./g, '/');
+
+  return `#!/data/data/com.termux/files/usr/bin/bash
+# ========================================
+# DroidCraft Auto-Builder
+# Project: ${rawName}
+# Package: ${pkgName}
+# ========================================
+set -e
+echo "📦 Building: ${rawName}"
+rm -rf ~/${folderName}
+mkdir -p ~/${folderName}
+cd ~/${folderName}
+mkdir -p app/src/main/java/${pkgPath}
+mkdir -p app/src/main/res/layout
+mkdir -p app/src/main/res/values
+mkdir -p app/src/main/res/drawable
+mkdir -p .github/workflows
+
+cat > settings.gradle << 'XEOF'
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories { google(); mavenCentral() }
+}
+rootProject.name = "${projectName}"
+include ':app'
+XEOF
+
+cat > build.gradle << 'XEOF'
+plugins {
+    id 'com.android.application' version '8.1.4' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.10' apply false
+}
+XEOF
+
+cat > gradle.properties << 'XEOF'
+org.gradle.jvmargs=-Xmx2048m
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+XEOF
+
+cat > app/build.gradle << 'XEOF'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+android {
+    namespace '${pkgName}'
+    compileSdk 34
+    defaultConfig {
+        applicationId "${pkgName}"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+XEOF
+
+cat > app/src/main/AndroidManifest.xml << 'XEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="${rawName}"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+XEOF
+
+cat > app/src/main/res/values/strings.xml << 'XEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">${rawName}</string>
+</resources>
+XEOF
+
+cat > app/src/main/res/drawable/ic_launcher.xml << 'XEOF'
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#4F46E5" android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M54,28 C38,28 25,41 25,57 C25,73 38,86 54,86 C70,86 83,73 83,57 C83,41 70,28 54,28 Z M54,74 C44.6,74 37,66.4 37,57 C37,47.6 44.6,40 54,40 C63.4,40 71,47.6 71,57 C71,66.4 63.4,74 54,74 Z"/>
+    <path android:fillColor="#EC4899" android:pathData="M46,53 C46,55.2 44.2,57 42,57 C39.8,57 38,55.2 38,53 C38,50.8 39.8,49 42,49 C44.2,49 46,50.8 46,53 Z"/>
+    <path android:fillColor="#EC4899" android:pathData="M70,53 C70,55.2 68.2,57 66,57 C63.8,57 62,55.2 62,53 C62,50.8 63.8,49 66,49 C68.2,49 70,50.8 70,53 Z"/>
+</vector>
+XEOF
+
+cat > app/src/main/java/${pkgPath}/MainActivity.kt << 'XEOF'
+${kotlin}
+XEOF
+
+${xmlFiles}
+
+cat > .gitignore << 'XEOF'
+*.apk
+*.aab
+build/
+.gradle/
+local.properties
+.idea/
+*.iml
+*.keystore
+*.jks
+.DS_Store
+XEOF
+
+cat > README.md << 'XEOF'
+# ${rawName}
+
+Built with DroidCraft
+
+## Download APK
+1. Open the Actions tab
+2. Tap the latest green checkmark
+3. Scroll down, tap Artifacts, download ${folderName}-apk
+4. Unzip and install app-debug.apk
+XEOF
+
+cat > .github/workflows/build.yml << 'XEOF'
+name: Build APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Accept Android SDK licenses
+        run: |
+          SDK="\${ANDROID_HOME:-\$ANDROID_SDK_ROOT}"
+          mkdir -p \$SDK/licenses
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > \$SDK/licenses/android-sdk-license
+          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> \$SDK/licenses/android-sdk-license
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> \$SDK/licenses/android-sdk-license
+      - name: Install SDK components
+        run: |
+          SDK="\${ANDROID_HOME:-\$ANDROID_SDK_ROOT}"
+          yes | \$SDK/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" || true
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${folderName}-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+XEOF
+
+echo ""
+echo "✅ Project created in ~/${folderName}"
+echo ""
+echo "=========================================="
+echo "NEXT STEPS:"
+echo "=========================================="
+echo ""
+echo "1. Create an EMPTY repo on GitHub:"
+echo "   https://github.com/new"
+echo "   Name: ${folderName}"
+echo "   Do NOT add README/gitignore/license"
+echo ""
+echo "2. Run these commands:"
+echo ""
+echo "   cd ~/${folderName}"
+echo "   git init && git branch -M main"
+echo "   git add ."
+echo "   git commit -m 'Initial commit'"
+echo "   git remote add origin https://github.com/YOUR_USERNAME/${folderName}.git"
+echo "   git push -u origin main"
+echo ""
+echo "3. Wait 2 min, then open GitHub Actions"
+echo "4. Download APK from Artifacts"
+echo ""
+echo "🎉 Done!"
+`;
+}
+
+function showPublishScript() {
+  document.getElementById('publish-script-text').value = generateTermuxScript();
+  document.getElementById('publish-options').style.display = 'none';
+  document.getElementById('publish-script-view').style.display = 'block';
+}
+
+function copyPublishScript(e) {
+  var t = document.getElementById('publish-script-text');
+  t.select(); t.setSelectionRange(0, 999999);
+  document.execCommand('copy');
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){});
+  var b = e ? e.target : event.target;
+  var o = b.textContent;
+  b.textContent = '✅ Copied! Paste in Termux';
+  setTimeout(function(){ b.textContent = o; }, 2500);
+}
+
+function openHelp() {
+  var editor = document.getElementById('editor-screen');
+  var profile = document.getElementById('profile-screen');
+  if (editor && editor.classList.contains('active')) _helpReturnScreen = 'editor-screen';
+  else if (profile && profile.classList.contains('active')) _helpReturnScreen = 'profile-screen';
+  else _helpReturnScreen = 'home-screen';
+  showScreen('help-screen');
+}
+var _helpReturnScreen = 'home-screen';
+function closeHelp() { showScreen(_helpReturnScreen); }
 </script>
 
 </body>
