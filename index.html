@@ -1120,9 +1120,9 @@
       <div class="stat-card"><div class="stat-value" id="stat-projects">0</div><div class="stat-label">Projects</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-screens">0</div><div class="stat-label">Screens</div></div>
     </div>
-    <div class="account-menu-item" onclick="editAccountName()">✏️ Edit Name</div>
-    <div class="account-menu-item" onclick="switchAccount()">🔄 Switch Account</div>
-    <div class="account-menu-item danger" onclick="logoutUser()">🚪 Logout</div>
+    <div class="account-menu-item" onclick="var u=JSON.parse(localStorage.getItem('droidCraftUser')||'{}');var n=prompt('New name:',u.name);if(n){u.name=n;localStorage.setItem('droidCraftUser',JSON.stringify(u));var users=JSON.parse(localStorage.getItem('droidCraftUsersDB')||'[]');var idx=users.findIndex(function(x){return x.email===u.email});if(idx>-1){users[idx].name=n;localStorage.setItem('droidCraftUsersDB',JSON.stringify(users))}document.getElementById('greeting-name').textContent=n;document.getElementById('home-avatar').textContent=n.charAt(0).toUpperCase();document.getElementById('account-name').textContent=n;document.getElementById('account-avatar').textContent=n.charAt(0).toUpperCase();}">✏️ Edit Name</div>
+    <div class="account-menu-item" onclick="document.getElementById('account-modal').classList.remove('active');localStorage.removeItem('droidCraftUser');document.getElementById('login-email').value='';document.getElementById('login-password').value='';document.getElementById('auth-screen').classList.add('active');document.getElementById('home-screen').classList.remove('active');">🔄 Switch Account</div>
+    <div class="account-menu-item danger" onclick="localStorage.removeItem('droidCraftUser');document.getElementById('account-modal').classList.remove('active');document.getElementById('login-email').value='';document.getElementById('login-password').value='';document.getElementById('auth-screen').classList.add('active');document.getElementById('home-screen').classList.remove('active');">🚪 Logout</div>
   </div>
 </div>
 
@@ -3343,6 +3343,88 @@ function openPrivacy() {
   showScreen('privacy-screen');
 }
 function closePrivacy() { showScreen(_pageReturn); }
+</script>
+
+<!-- DroidCraft Custom Alert -->
+<div id="dc-alert-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:99998;display:none;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:white;border-radius:24px;padding:28px;width:100%;max-width:340px;box-shadow:0 30px 60px rgba(0,0,0,0.4);text-align:center;animation:dcAlertIn 0.32s cubic-bezier(0.34,1.56,0.64,1);">
+    <div style="font-size:40px;margin-bottom:12px;line-height:1;">&#8505;</div>
+    <div style="font-size:18px;font-weight:800;color:#1F2937;margin-bottom:8px;">DroidCraft</div>
+    <div id="dc-alert-message" style="font-size:14px;color:#6B7280;line-height:1.5;margin-bottom:22px;">Loading...</div>
+    <button onclick="dcCloseAlert()" style="width:100%;padding:14px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(79,70,229,0.35);font-family:inherit;">OK</button>
+  </div>
+</div>
+<style>
+  @keyframes dcAlertIn {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+</style>
+
+<script>
+/* ========== DROIDCRAFT CUSTOM DIALOG ========== */
+function dcAlert(message) {
+  var overlay = document.getElementById('dc-alert-overlay');
+  var msg = document.getElementById('dc-alert-message');
+  if (!overlay || !msg) {
+    alert(message);
+    return;
+  }
+  msg.textContent = message;
+  overlay.style.display = 'flex';
+}
+
+function dcCloseAlert() {
+  var overlay = document.getElementById('dc-alert-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+/* Make those 4 sections tappable */
+function dcAttachSectionTaps() {
+  var allDivs = document.querySelectorAll('div');
+  var sectionTitles = ['Recent Activity', 'Design Tip of the Day', 'Weekly Challenge', 'Component Spotlight'];
+
+  for (var i = 0; i < allDivs.length; i++) {
+    var d = allDivs[i];
+
+    // Skip if already handled
+    if (d._dcTapped) continue;
+
+    // Only check section-title divs
+    if (d.className !== 'section-title') continue;
+
+    var titleText = d.textContent.trim();
+    if (sectionTitles.indexOf(titleText) === -1) continue;
+
+    // Mark the section title as tapped but don't act on it - find the sibling content div
+    var target = d.nextElementSibling;
+    if (!target) continue;
+
+    target.style.cursor = 'pointer';
+    target.onclick = function(e) {
+      e.stopPropagation();
+      dcAlert('Coming Soon');
+    };
+    target._dcTapped = true;
+  }
+}
+
+/* Run when home loads and every time we return to it */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(dcAttachSectionTaps, 400); });
+} else {
+  setTimeout(dcAttachSectionTaps, 400);
+}
+
+if (typeof window.showScreen === 'function' && !window._dcHooked) {
+  window._dcHooked = true;
+  var _origShow = window.showScreen;
+  window.showScreen = function(id) {
+    var r = _origShow.apply(this, arguments);
+    if (id === 'home-screen') setTimeout(dcAttachSectionTaps, 300);
+    return r;
+  };
+}
 </script>
 </body>
 </html>
