@@ -803,6 +803,111 @@
     font-size: 42px !important;
     margin-bottom: 14px !important;
   }
+
+/* ========== GUIDE COLORED BOXES: READABLE IN DARK MODE ========== */
+
+/* Yellow warning (Termux warning box) */
+body.dark [style*="background:#FEF3C7"],
+body.dark [style*="background: #FEF3C7"],
+body.dark [style*="background:#FDE68A"],
+body.dark [style*="background: #FDE68A"],
+body.dark [style*="background:#FEF9C3"],
+body.dark [style*="background:#FFFBEB"] {
+  color: #78350F !important;
+}
+body.dark [style*="background:#FEF3C7"] *,
+body.dark [style*="background:#FDE68A"] *,
+body.dark [style*="background:#FEF9C3"] *,
+body.dark [style*="background:#FFFBEB"] *,
+body.dark .guide-highlight.tip *,
+body.dark .guide-tip *,
+body.dark .guide-tip-body p,
+body.dark .guide-tip-body h5 {
+  color: #78350F !important;
+}
+
+/* Green success boxes */
+body.dark [style*="background:#DCFCE7"],
+body.dark [style*="background:#D1FAE5"],
+body.dark [style*="background:#ECFDF5"] {
+  color: #065F46 !important;
+}
+body.dark [style*="background:#DCFCE7"] *,
+body.dark [style*="background:#D1FAE5"] *,
+body.dark [style*="background:#ECFDF5"] * {
+  color: #065F46 !important;
+}
+
+/* Red warning boxes */
+body.dark [style*="background:#FEE2E2"],
+body.dark [style*="background:#FEF2F2"],
+body.dark .guide-highlight.warn,
+body.dark .guide-highlight.warn * {
+  color: #991B1B !important;
+}
+body.dark [style*="background:#FEE2E2"] b,
+body.dark .guide-highlight.warn b {
+  color: #7F1D1D !important;
+}
+
+/* Blue info boxes */
+body.dark [style*="background:#DBEAFE"],
+body.dark [style*="background:#E0F2FE"],
+body.dark [style*="background:#F0F9FF"] {
+  color: #1E3A8A !important;
+}
+body.dark [style*="background:#DBEAFE"] *,
+body.dark [style*="background:#E0F2FE"] *,
+body.dark [style*="background:#F0F9FF"] * {
+  color: #1E3A8A !important;
+}
+
+/* Purple code block — force light text on purple background */
+body.dark [style*="background:#4F46E5"] code,
+body.dark [style*="background: #4F46E5"] code,
+body.dark [style*="background:#4F46E5"] *,
+body.dark .guide-highlight code {
+  color: #FFFFFF !important;
+}
+
+/* Inline code inside light boxes — keep readable */
+body.dark [style*="background:#FEF3C7"] code,
+body.dark [style*="background:#DCFCE7"] code,
+body.dark [style*="background:#FEE2E2"] code {
+  background: rgba(255,255,255,0.55) !important;
+  color: #1F2937 !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* The <code> inside user guide paragraphs on dark bg */
+body.dark .guide-content code,
+body.dark [style*="flex:1;overflow-y:auto"] code {
+  color: #A5B4FC;
+}
+
+/* Guide paragraphs general */
+body.dark .guide-content p,
+body.dark .guide-content li,
+body.dark .guide-content b {
+  color: var(--text) !important;
+}
+
+/* Guide section cards */
+body.dark .guide-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+body.dark .guide-card p,
+body.dark .guide-card li,
+body.dark .guide-card b {
+  color: var(--text) !important;
+}
+
+/* Hero section keeps white text */
+body.dark .guide-hero, body.dark .guide-hero * {
+  color: #FFFFFF !important;
+}
 </style>
 </head>
 <body>
@@ -3033,224 +3138,9 @@ function copyPublishScript(e) {
   setTimeout(function(){ b.textContent = o; }, 2500);
 }
 
-function openHelp() {
-  var editor = document.getElementById('editor-screen');
-  var profile = document.getElementById('profile-screen');
-  if (editor && editor.classList.contains('active')) _helpReturnScreen = 'editor-screen';
-  else if (profile && profile.classList.contains('active')) _helpReturnScreen = 'profile-screen';
-  else _helpReturnScreen = 'home-screen';
-  showScreen('help-screen');
-}
+
 var _helpReturnScreen = 'home-screen';
-function closeHelp() { showScreen(_helpReturnScreen); }
 
-
-</script>
-
-<div id="help-screen" class="screen">
-  <div class="app-header">
-    <div class="header-group">
-      <button class="back-btn" onclick="closeHelp()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-    </div>
-    <h1 style="font-size:16px;font-weight:700;color:var(--text);">📚 User Guide</h1>
-    <div class="header-group" style="width:42px;"></div>
-  </div>
-
-  <div class="guide-content">
-
-    <div class="guide-hero">
-      <span class="guide-hero-icon">🚀</span>
-      <h2>Build Android apps<br>on your phone</h2>
-      <p>Design visually, then use Termux + GitHub to turn it into a real installable APK.</p>
-      <div class="guide-hero-meta">
-        <span>⏱ 10 min</span>
-        <span>📱 No code</span>
-        <span>💯 Free</span>
-      </div>
-    </div>
-
-    <!-- PART 1 -->
-    <div class="guide-section-head">
-      <div class="guide-num">1</div>
-      <div class="guide-title">Design your app</div>
-    </div>
-
-    <div class="guide-card">
-      <p><b>🎨 Pick a starting point</b><br>
-      Tap <b>✨ New App</b> for a blank canvas, or choose a template — Login, Form, Welcome, or any card under <b>Explore More</b>.</p>
-
-      <p><b>🧩 Add components</b><br>
-      At the bottom of the editor:</p>
-      <ul class="guide-checklist">
-        <li><b>+ Button</b> — clickable button</li>
-        <li><b>+ Text</b> — label or heading</li>
-        <li><b>+ Input</b> — text field</li>
-        <li><b>+ Image</b> — picture placeholder</li>
-        <li><b>+ Checkbox</b> — toggle option</li>
-        <li><b>+ More</b> — Radio, Switch, Slider, Card, Divider, Icon</li>
-      </ul>
-
-      <p style="margin-top:16px;"><b>✏️ Edit any component</b><br>
-      Tap a component → panel opens with 3 tabs:</p>
-      <ul class="guide-checklist">
-        <li><b>Content</b> — ID, text, link target</li>
-        <li><b>Style</b> — size, colors, corner radius, padding</li>
-        <li><b>Layout</b> — width, alignment, spacing</li>
-      </ul>
-
-      <p style="margin-top:16px;"><b>📱 Multiple screens</b><br>
-      Tap <b>+ Screen</b> to add screens. Long-press a tab and drag to reorder. The <b>first screen</b> is always the start screen (🏁 icon).</p>
-
-      <div class="guide-highlight">
-        To link a button to another screen: tap the button → Content tab → set <b>On Click → Go to Screen</b>.
-      </div>
-    </div>
-
-    <!-- PART 2 -->
-    <div class="guide-section-head">
-      <div class="guide-num">2</div>
-      <div class="guide-title">What is Termux?</div>
-    </div>
-
-    <div class="guide-card">
-      <p><b>💻 Termux is a terminal app</b><br>
-      It gives you a Linux command line on Android — like a mini computer inside your phone. You don't need coding knowledge; you just paste commands.</p>
-
-      <p><b>📥 Install Termux</b><br>
-      Download Termux from <b>F-Droid</b> at <code>f-droid.org</code>.</p>
-
-      <div class="guide-highlight warn">
-        <b>⚠️ Important:</b> Do NOT install Termux from Google Play. That version is old and broken.
-      </div>
-
-      <p style="margin-top:16px;"><b>🎯 Why we use it</b><br>
-      Termux takes your design from DroidCraft and creates the real Android project files (Kotlin, Gradle, XML). Then you push them to GitHub — GitHub builds the APK for free.</p>
-
-      <p><b>🔧 First-time setup</b><br>
-      Open Termux and run this once:</p>
-      <div class="guide-highlight">
-        <code>pkg install git -y</code>
-      </div>
-    </div>
-
-    <!-- PART 3 -->
-    <div class="guide-section-head">
-      <div class="guide-num">3</div>
-      <div class="guide-title">Publish your app</div>
-    </div>
-
-    <div class="guide-card">
-      <p><b>📦 Generate the script</b><br>
-      In DroidCraft, open your project and tap <b>📦 Publish</b> → <b>📱 Build Real APK</b> → <b>📋 Copy Script</b>. The whole project code is now in your clipboard.</p>
-
-      <p><b>💻 Run it in Termux</b></p>
-      <ol class="guide-numbered">
-        <li>Open <b>Termux</b></li>
-        <li>Long-press the screen → <b>Paste</b></li>
-        <li>Press <b>Enter</b></li>
-        <li>Wait 2–3 seconds — Termux creates your project folder</li>
-      </ol>
-
-      <div class="guide-highlight">
-        Termux prints the exact commands to push your project to GitHub. Don't close it yet — you'll need those commands.
-      </div>
-    </div>
-
-    <!-- PART 4 -->
-    <div class="guide-section-head">
-      <div class="guide-num">4</div>
-      <div class="guide-title">Build APK with GitHub</div>
-    </div>
-
-    <div class="guide-card">
-      <p><b>🐙 What is GitHub?</b><br>
-      A free website where code lives. Its <b>Actions</b> feature runs servers that build Android apps in the cloud — you don't install anything.</p>
-
-      <p><b>🆕 Create your repo</b></p>
-      <ol class="guide-numbered">
-        <li>Sign up at <b>github.com</b> (free)</li>
-        <li>Tap <b>+ → New repository</b></li>
-        <li>Name it whatever you want</li>
-        <li><b>Do NOT</b> add README, .gitignore, or license</li>
-        <li>Tap <b>Create repository</b></li>
-      </ol>
-
-      <p style="margin-top:16px;"><b>⬆️ Push your code</b><br>
-      Paste the commands Termux printed back into Termux and press Enter. It uploads your project to GitHub.</p>
-
-      <p><b>⏳ Wait for the build</b><br>
-      Open your repo → tap <b>Actions</b> tab. A yellow dot means building. Wait 2–4 min for a <b>green ✅</b>.</p>
-
-      <p><b>⬇️ Download your APK</b></p>
-      <ol class="guide-numbered">
-        <li>Tap the green ✅ run</li>
-        <li>Scroll down to <b>Artifacts</b></li>
-        <li>Download the .zip file</li>
-        <li>Unzip → install <b>app-debug.apk</b></li>
-        <li>Allow unknown sources if asked</li>
-      </ol>
-
-      <div class="guide-highlight" style="background:#DCFCE7;border-left-color:#10B981;">
-        🎉 Your app is now installed on your phone!
-      </div>
-    </div>
-
-    <!-- PRO TIPS -->
-    <div class="guide-tip">
-      <div class="guide-tip-icon">💡</div>
-      <div class="guide-tip-body">
-        <h5>Pro Tips</h5>
-        <p>• First build is slowest (~4 min). Later builds are ~1 min.<br>
-        • After editing your app, just push again — GitHub rebuilds automatically.<br>
-        • Share the APK with anyone — it works on any Android phone.<br>
-        • Save your GitHub token in a note so you don't lose it.</p>
-      </div>
-    </div>
-
-    <!-- FAQ -->
-    <div class="guide-faq-title">Common Questions</div>
-    <div class="guide-faq">
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Do I need coding skills?</div>
-        <div class="faq-a">Not at all. You design visually. Termux and GitHub do the technical work.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Is everything really free?</div>
-        <div class="faq-a">Yes. Termux, GitHub for personal use, and DroidCraft itself are all 100% free.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">How long does the APK build take?</div>
-        <div class="faq-a">First build: 3–4 minutes (it downloads the Android SDK). Every build after that: about 1 minute.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Can I share my app with friends?</div>
-        <div class="faq-a">Absolutely. The APK is a normal Android app. Share via WhatsApp, Drive, or publish on Play Store.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">What if the build fails?</div>
-        <div class="faq-a">Open the failed step on GitHub Actions — the error appears there. Most common cause: the repo wasn't created empty (it had a README).</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Can I sell my app?</div>
-        <div class="faq-a">Yes. The APK is yours. Upload it to Play Store, share it, or sell it — your choice.</div>
-      </div>
-    </div>
-
-    <!-- CTA -->
-    <div class="guide-cta">
-      <h3>You've got everything 🎉</h3>
-      <p>Time to design your first app and share it with the world.</p>
-      <button onclick="closeHelp()">Start building →</button>
-    </div>
-
-  </div>
-</div>
-
-
-<script>
-function socialLogin(provider) {
-  alert(provider + " Sign-In will be available soon. For now please use your email and password.");
-}
 </script>
 
 <div id="faq-screen" class="screen">
@@ -3325,54 +3215,10 @@ function socialLogin(provider) {
 
 <script>
 var _pageReturn = 'home-screen';
-function openFAQ() {
-  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
-  else _pageReturn = 'home-screen';
-  showScreen('faq-screen');
-}
-function closeFAQ() { showScreen(_pageReturn); }
-function openContact() {
-  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
-  else _pageReturn = 'home-screen';
-  showScreen('contact-screen');
-}
-function closeContact() { showScreen(_pageReturn); }
-function openPrivacy() {
-  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
-  else _pageReturn = 'home-screen';
-  showScreen('privacy-screen');
-}
-function closePrivacy() { showScreen(_pageReturn); }
-</script>
 
-<!-- DroidCraft Custom Alert -->
-<div id="dc-alert-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:99998;display:none;align-items:center;justify-content:center;padding:24px;">
-  <div style="background:white;border-radius:24px;padding:28px;width:100%;max-width:340px;box-shadow:0 30px 60px rgba(0,0,0,0.4);text-align:center;animation:dcAlertIn 0.32s cubic-bezier(0.34,1.56,0.64,1);">
-    <div style="font-size:40px;margin-bottom:12px;line-height:1;">&#8505;</div>
-    <div style="font-size:18px;font-weight:800;color:#1F2937;margin-bottom:8px;">DroidCraft</div>
-    <div id="dc-alert-message" style="font-size:14px;color:#6B7280;line-height:1.5;margin-bottom:22px;">Loading...</div>
-    <button onclick="dcCloseAlert()" style="width:100%;padding:14px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(79,70,229,0.35);font-family:inherit;">OK</button>
-  </div>
-</div>
-<style>
-  @keyframes dcAlertIn {
-    from { opacity: 0; transform: scale(0.85) translateY(20px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
-</style>
 
-<script>
-/* ========== DROIDCRAFT CUSTOM DIALOG ========== */
-function dcAlert(message) {
-  var overlay = document.getElementById('dc-alert-overlay');
-  var msg = document.getElementById('dc-alert-message');
-  if (!overlay || !msg) {
-    alert(message);
-    return;
-  }
-  msg.textContent = message;
-  overlay.style.display = 'flex';
-}
+
+
 
 function dcCloseAlert() {
   var overlay = document.getElementById('dc-alert-overlay');
@@ -3425,6 +3271,88 @@ if (typeof window.showScreen === 'function' && !window._dcHooked) {
     return r;
   };
 }
+
+/* ========== PAGE NAVIGATION (returns to Settings if opened from there) ========== */
+var _pageReturn = 'home-screen';
+var _openedFromSettings = false;
+
+function _showPage(pageId) {
+  var settingsModal = document.getElementById('builder-settings-modal');
+  _openedFromSettings = !!(settingsModal && settingsModal.classList.contains('active'));
+
+  if (!_openedFromSettings) {
+    var editorActive = document.getElementById('editor-screen').classList.contains('active');
+    _pageReturn = editorActive ? 'editor-screen' : 'home-screen';
+  } else {
+    _pageReturn = 'home-screen'; // placeholder, we'll reopen Settings on back
+  }
+
+  if (settingsModal) settingsModal.classList.remove('active');
+  setTimeout(function() { showScreen(pageId); }, 100);
+}
+
+function _goBackFromPage() {
+  showScreen(_pageReturn);
+  if (_openedFromSettings) {
+    setTimeout(function() {
+      var settingsModal = document.getElementById('builder-settings-modal');
+      if (settingsModal) settingsModal.classList.add('active');
+    }, 250);
+    _openedFromSettings = false;
+  }
+}
+
+/* FAQ */
+function openFAQ() { _showPage('faq-screen'); }
+function closeFAQ() { _goBackFromPage(); }
+
+/* Contact */
+function openContact() { _showPage('contact-screen'); }
+function closeContact() { _goBackFromPage(); }
+
+/* Privacy */
+function openPrivacy() { _showPage('privacy-screen'); }
+function closePrivacy() { _goBackFromPage(); }
+
+/* User Guide */
+function openHelp() {
+  // User guide is special — it usually returns to where you came from
+  var settingsModal = document.getElementById('builder-settings-modal');
+  var wasSettings = settingsModal && settingsModal.classList.contains('active');
+
+  if (wasSettings) {
+    settingsModal.classList.remove('active');
+    _openedFromSettings = true;
+  } else {
+    _openedFromSettings = false;
+    var editorActive = document.getElementById('editor-screen').classList.contains('active');
+    _pageReturn = editorActive ? 'editor-screen' : 'home-screen';
+  }
+
+  setTimeout(function() { showScreen('help-screen'); }, 100);
+}
+function closeHelp() {
+  if (_openedFromSettings) {
+    showScreen('home-screen');
+    setTimeout(function() {
+      var settingsModal = document.getElementById('builder-settings-modal');
+      if (settingsModal) settingsModal.classList.add('active');
+    }, 250);
+    _openedFromSettings = false;
+  } else {
+    showScreen(_pageReturn);
+  }
+}
+
+/* Also expose to window for inline onclick */
+window.openFAQ = openFAQ;
+window.closeFAQ = closeFAQ;
+window.openContact = openContact;
+window.closeContact = closeContact;
+window.openPrivacy = openPrivacy;
+window.closePrivacy = closePrivacy;
+window.openHelp = openHelp;
+window.closeHelp = closeHelp;
 </script>
 </body>
 </html>
