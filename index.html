@@ -3217,7 +3217,7 @@ var _helpReturnScreen = 'home-screen';
 </div>
 
 <script>
-var _pageReturn = 'home-screen';
+
 
 
 
@@ -3276,76 +3276,16 @@ if (typeof window.showScreen === 'function' && !window._dcHooked) {
 }
 
 /* ========== PAGE NAVIGATION (returns to Settings if opened from there) ========== */
-var _pageReturn = 'home-screen';
-var _openedFromSettings = false;
 
-function _showPage(pageId) {
-  var settingsModal = document.getElementById('builder-settings-modal');
-  _openedFromSettings = !!(settingsModal && settingsModal.classList.contains('active'));
 
-  if (!_openedFromSettings) {
-    var editorActive = document.getElementById('editor-screen').classList.contains('active');
-    _pageReturn = editorActive ? 'editor-screen' : 'home-screen';
-  } else {
-    _pageReturn = 'home-screen'; // placeholder, we'll reopen Settings on back
-  }
 
-  if (settingsModal) settingsModal.classList.remove('active');
-  setTimeout(function() { showScreen(pageId); }, 100);
-}
 
-function _goBackFromPage() {
-  showScreen(_pageReturn);
-  if (_openedFromSettings) {
-    setTimeout(function() {
-      var settingsModal = document.getElementById('builder-settings-modal');
-      if (settingsModal) settingsModal.classList.add('active');
-    }, 250);
-    _openedFromSettings = false;
-  }
-}
+
+
 
 /* FAQ */
-function openFAQ() { _showPage('faq-screen'); }
-function closeFAQ() { _goBackFromPage(); }
 
-/* Contact */
-function openContact() { _showPage('contact-screen'); }
-function closeContact() { _goBackFromPage(); }
 
-/* Privacy */
-function openPrivacy() { _showPage('privacy-screen'); }
-function closePrivacy() { _goBackFromPage(); }
-
-/* User Guide */
-function openHelp() {
-  // User guide is special — it usually returns to where you came from
-  var settingsModal = document.getElementById('builder-settings-modal');
-  var wasSettings = settingsModal && settingsModal.classList.contains('active');
-
-  if (wasSettings) {
-    settingsModal.classList.remove('active');
-    _openedFromSettings = true;
-  } else {
-    _openedFromSettings = false;
-    var editorActive = document.getElementById('editor-screen').classList.contains('active');
-    _pageReturn = editorActive ? 'editor-screen' : 'home-screen';
-  }
-
-  setTimeout(function() { showScreen('help-screen'); }, 100);
-}
-function closeHelp() {
-  if (_openedFromSettings) {
-    showScreen('home-screen');
-    setTimeout(function() {
-      var settingsModal = document.getElementById('builder-settings-modal');
-      if (settingsModal) settingsModal.classList.add('active');
-    }, 250);
-    _openedFromSettings = false;
-  } else {
-    showScreen(_pageReturn);
-  }
-}
 
 /* Also expose to window for inline onclick */
 window.openFAQ = openFAQ;
@@ -3536,6 +3476,41 @@ function editAccountName() {
   inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('inp-ok').click(); });
 }
 window.editAccountName = editAccountName;
+
+var _pageReturn = 'home-screen';
+var _openedFromSettings = false;
+function _goToPage(id) {
+  var s = document.getElementById('builder-settings-modal');
+  _openedFromSettings = !!(s && s.classList.contains('active'));
+  if (!_openedFromSettings) {
+    var e = document.getElementById('editor-screen');
+    _pageReturn = (e && e.classList.contains('active')) ? 'editor-screen' : 'home-screen';
+  }
+  if (s) s.classList.remove('active');
+  setTimeout(function() { showScreen(id); }, 100);
+}
+function _goBackFromPage() {
+  showScreen(_pageReturn);
+  if (_openedFromSettings) {
+    setTimeout(function() {
+      var s = document.getElementById('builder-settings-modal');
+      if (s) s.classList.add('active');
+    }, 250);
+    _openedFromSettings = false;
+  }
+}
+function openFAQ() { _goToPage('faq-screen'); }
+function closeFAQ() { _goBackFromPage(); }
+function openContact() { _goToPage('contact-screen'); }
+function closeContact() { _goBackFromPage(); }
+function openPrivacy() { _goToPage('privacy-screen'); }
+function closePrivacy() { _goBackFromPage(); }
+function openHelp() { _goToPage('help-screen'); }
+function closeHelp() { _goBackFromPage(); }
+window.openFAQ = openFAQ; window.closeFAQ = closeFAQ;
+window.openContact = openContact; window.closeContact = closeContact;
+window.openPrivacy = openPrivacy; window.closePrivacy = closePrivacy;
+window.openHelp = openHelp; window.closeHelp = closeHelp;
 </script>
 </body>
 </html>
