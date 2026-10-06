@@ -12,53 +12,49 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var webView: WebView
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         webView = WebView(this)
         setContentView(webView)
 
-        val settings = webView.settings
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.allowFileAccess = true
-        settings.allowContentAccess = true
-        settings.databaseEnabled = true
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.builtInZoomControls = false
-        settings.displayZoomControls = false
-        settings.mediaPlaybackRequiresUserGesture = false
-        settings.setSupportZoom(false)
-        settings.javaScriptCanOpenWindowsAutomatically = true
+        val s = webView.settings
+        s.javaScriptEnabled = true
+        s.domStorageEnabled = true
+        s.allowFileAccess = true
+        s.allowContentAccess = true
+        s.databaseEnabled = true
+        s.cacheMode = WebSettings.LOAD_DEFAULT
+        s.useWideViewPort = true
+        s.loadWithOverviewMode = true
+        s.builtInZoomControls = false
+        s.displayZoomControls = false
+        s.mediaPlaybackRequiresUserGesture = false
+        s.setSupportZoom(false)
+        s.javaScriptCanOpenWindowsAutomatically = true
 
         webView.isLongClickable = false
-        webView.isHapticFeedbackEnabled = true
         webView.setOnLongClickListener { true }
 
-        // Fallback native dialogs (used only if JS-side dialogs aren't available)
         webView.webChromeClient = object : WebChromeClient() {
-            override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
-                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message)
-                    .setPositiveButton("OK") { _, _ -> result?.confirm() }.setCancelable(false).show()
+            override fun onJsAlert(v: WebView?, u: String?, m: String?, r: JsResult?): Boolean {
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(m)
+                    .setPositiveButton("OK") { _, _ -> r?.confirm() }.setCancelable(false).show()
                 return true
             }
-            override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
-                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message)
-                    .setPositiveButton("OK") { _, _ -> result?.confirm() }
-                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }.setCancelable(false).show()
+            override fun onJsConfirm(v: WebView?, u: String?, m: String?, r: JsResult?): Boolean {
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(m)
+                    .setPositiveButton("OK") { _, _ -> r?.confirm() }
+                    .setNegativeButton("Cancel") { _, _ -> r?.cancel() }.setCancelable(false).show()
                 return true
             }
-            override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult?): Boolean {
-                val input = EditText(this@MainActivity).apply { setText(defaultValue ?: ""); setSelection(text.length) }
-                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(message).setView(input)
-                    .setPositiveButton("OK") { _, _ -> result?.confirm(input.text.toString()) }
-                    .setNegativeButton("Cancel") { _, _ -> result?.cancel() }.setCancelable(false).show()
+            override fun onJsPrompt(v: WebView?, u: String?, m: String?, d: String?, r: JsPromptResult?): Boolean {
+                val input = EditText(this@MainActivity).apply { setText(d ?: ""); setSelection(text.length) }
+                AlertDialog.Builder(this@MainActivity).setTitle("DroidCraft").setMessage(m).setView(input)
+                    .setPositiveButton("OK") { _, _ -> r?.confirm(input.text.toString()) }
+                    .setNegativeButton("Cancel") { _, _ -> r?.cancel() }.setCancelable(false).show()
                 return true
             }
         }
@@ -68,15 +64,10 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        // Ask JS. JS returns true if it handled the back press internally.
         webView.evaluateJavascript(
             "(function(){ return window.handleBackButton ? window.handleBackButton() : false; })()"
         ) { result ->
-            val clean = result?.replace("\"", "") ?: ""
-            if (clean != "true") {
-                @Suppress("DEPRECATION")
-                super.onBackPressed()
-            }
+            if (result != "true") { @Suppress("DEPRECATION") super.onBackPressed() }
         }
     }
 }
