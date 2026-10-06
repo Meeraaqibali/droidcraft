@@ -3213,5 +3213,97 @@ function socialLogin(provider) {
   alert(provider + " Sign-In will be available soon. For now please use your email and password.");
 }
 </script>
+
+<div id="faq-screen" class="screen">
+  <div class="app-header">
+    <div class="header-group"><button class="back-btn" onclick="closeFAQ()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button></div>
+    <h1 style="font-size:16px;font-weight:700;color:var(--text);">FAQ</h1>
+    <div class="header-group" style="width:42px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:20px;">
+    <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;padding:24px;border-radius:20px;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">Q</div>
+      <div style="font-size:19px;font-weight:800;margin-bottom:4px;">Frequently Asked</div>
+      <div style="font-size:13px;opacity:0.92;">Quick answers to common questions.</div>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Getting Started</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">How do I create my first app?</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">Tap New App on Home or pick a template. Add components from the bottom toolbar. Tap Save when done.</div></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">Do I need coding skills?</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">No. You design visually and DroidCraft handles the technical parts.</div></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">What is Termux?</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">A free terminal app for Android. Install from F-Droid to run build scripts.</div></div>
+    <div style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;">Building Apps</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">How long does the build take?</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">First build: 3-4 minutes. Later builds: about 1 minute.</div></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">Is everything free?</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">Yes. DroidCraft, Termux, and GitHub for personal use are all free.</div></div>
+  </div>
+</div>
+
+<div id="contact-screen" class="screen">
+  <div class="app-header">
+    <div class="header-group"><button class="back-btn" onclick="closeContact()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button></div>
+    <h1 style="font-size:16px;font-weight:700;color:var(--text);">Contact</h1>
+    <div class="header-group" style="width:42px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:20px;">
+    <div style="background:linear-gradient(135deg,#10B981,#059669);color:white;padding:24px;border-radius:20px;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">@</div>
+      <div style="font-size:19px;font-weight:800;margin-bottom:4px;">Get In Touch</div>
+      <div style="font-size:13px;opacity:0.92;">We would love to hear from you.</div>
+    </div>
+    <a href="mailto:support@droidcraft.app" style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;text-decoration:none;margin-bottom:10px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#4F46E5;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;flex-shrink:0;">M</div>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Email Support</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">support@droidcraft.app</div></div>
+      <div style="font-size:18px;color:var(--text-muted);">&gt;</div>
+    </a>
+    <a href="mailto:feedback@droidcraft.app" style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;text-decoration:none;margin-bottom:10px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#10B981;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;flex-shrink:0;">C</div>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Send Feedback</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">feedback@droidcraft.app</div></div>
+      <div style="font-size:18px;color:var(--text-muted);">&gt;</div>
+    </a>
+    <a href="https://github.com/Meeraaqibali/droidcraft/issues" target="_blank" style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;text-decoration:none;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#111827;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;flex-shrink:0;">G</div>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Report a Bug</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Open on GitHub</div></div>
+      <div style="font-size:18px;color:var(--text-muted);">&gt;</div>
+    </a>
+  </div>
+</div>
+
+<div id="privacy-screen" class="screen">
+  <div class="app-header">
+    <div class="header-group"><button class="back-btn" onclick="closePrivacy()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button></div>
+    <h1 style="font-size:16px;font-weight:700;color:var(--text);">Privacy</h1>
+    <div class="header-group" style="width:42px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:20px;">
+    <div style="background:linear-gradient(135deg,#EF4444,#DC2626);color:white;padding:24px;border-radius:20px;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:6px;">L</div>
+      <div style="font-size:19px;font-weight:800;margin-bottom:4px;">Privacy Policy</div>
+      <div style="font-size:13px;opacity:0.92;">Last updated October 2026.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;">Data We Collect</div><div style="font-size:13px;color:var(--text);line-height:1.7;">- Account info: name, email, password<br>- App designs: screens, components<br>- Preferences: theme, dark mode<br>- Profile photo: only if uploaded</div><div style="font-size:12px;color:var(--text-muted);margin-top:12px;">All stored locally on your phone.</div></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;">What We Don't Do</div><div style="font-size:13px;color:var(--text);line-height:1.7;">- No usage tracking<br>- No ads<br>- No selling data<br>- No third-party sharing</div></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;"><div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;">Your Rights</div><div style="font-size:13px;color:var(--text);line-height:1.6;">Delete your account and all data anytime from Profile.</div></div>
+  </div>
+</div>
+
+<script>
+var _pageReturn = 'home-screen';
+function openFAQ() {
+  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
+  else _pageReturn = 'home-screen';
+  showScreen('faq-screen');
+}
+function closeFAQ() { showScreen(_pageReturn); }
+function openContact() {
+  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
+  else _pageReturn = 'home-screen';
+  showScreen('contact-screen');
+}
+function closeContact() { showScreen(_pageReturn); }
+function openPrivacy() {
+  if (document.getElementById('editor-screen').classList.contains('active')) _pageReturn = 'editor-screen';
+  else _pageReturn = 'home-screen';
+  showScreen('privacy-screen');
+}
+function closePrivacy() { showScreen(_pageReturn); }
+</script>
 </body>
 </html>
