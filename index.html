@@ -1085,7 +1085,41 @@ body.dark .guide-hero, body.dark .guide-hero * {
       </div>
     </div>
 
-    <div class="section-title">My Projects</div>
+    <div class="section-title" style="margin-top:24px;">Recent Activity</div>
+<div onclick="dcShowLoading('Recent Activity')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:20px;cursor:pointer;">
+<div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:16px;color:white;flex-shrink:0;">&#128640;</div>
+<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Welcome aboard!</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">You created your DroidCraft account</div></div>
+<div style="font-size:11px;color:var(--text-muted);flex-shrink:0;">Today</div>
+</div>
+
+<div class="section-title">Design Tip of the Day</div>
+<div onclick="dcShowLoading('Design Tip')" style="background:linear-gradient(135deg,#F0F9FF,#E0F2FE);border:1px solid #BAE6FD;border-radius:16px;padding:18px;margin-bottom:20px;cursor:pointer;">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+<div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0EA5E9,#0284C7);display:flex;align-items:center;justify-content:center;font-size:16px;color:white;">&#127912;</div>
+<div style="font-size:13px;font-weight:800;color:#0C4A6E;">Tip #6</div>
+</div>
+<div style="font-size:13px;line-height:1.6;color:#075985;">Group related inputs with <b>16dp spacing</b>. Login + password should feel like a unit.</div>
+</div>
+
+<div class="section-title">Weekly Challenge</div>
+<div onclick="dcShowLoading('Weekly Challenge')" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border-radius:18px;padding:20px;margin-bottom:20px;box-shadow:0 12px 28px rgba(79,70,229,.3);cursor:pointer;">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+<span style="font-size:20px;">&#127942;</span>
+<span style="font-size:11px;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:1px;">This Week</span>
+</div>
+<div style="font-size:17px;font-weight:800;margin-bottom:6px;">Build a Login Screen</div>
+<div style="font-size:12.5px;opacity:.9;line-height:1.5;">Create a login form with email, password, and a Forgot Password link.</div>
+</div>
+
+<div class="section-title">Component Spotlight</div>
+<div onclick="dcShowLoading('Component Spotlight')" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:28px;cursor:pointer;">
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+<div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">&#128247;</div>
+<div style="flex:1;"><div style="font-size:15px;font-weight:800;color:var(--text);">Image</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Add pictures to your app</div></div>
+</div>
+<div style="width:100%;background:var(--primary-light);color:var(--primary);border-radius:12px;padding:11px;font-size:13px;font-weight:700;text-align:center;">Try It Now</div>
+</div>
+<div class="section-title">My Projects</div>
     <div class="projects-list" id="projects-list"></div>
     <div class="section-title" style="margin-top:24px;">Coming Soon</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
@@ -1581,38 +1615,7 @@ function openAccountModal() {
   document.getElementById('stat-screens').textContent = totalScreens;
   document.getElementById('account-modal').classList.add('active');
 }
-function editAccountName() { closeModal(null, 'account-modal'); openProfileScreen(); }
 
-/* NAVIGATION */
-async function showHome() {
-  var hasDraft = (currentProjectId === null) && (typeof projectScreens !== 'undefined') && projectScreens.length > 0;
-  var hasContent = false;
-  if (hasDraft) {
-    var placedCount = document.querySelectorAll('#canvas .placed').length;
-    hasContent = placedCount > 0 || projectScreens.length > 1;
-  }
-  if (hasContent) {
-    var shouldSave = false;
-    if (typeof customConfirm === 'function') {
-      shouldSave = await customConfirm('Save your changes before leaving?', {
-        title: 'Unsaved Changes',
-        icon: '💾',
-        okText: 'Save',
-        cancelText: 'Discard'
-      });
-    } else {
-      shouldSave = confirm('Save your changes before leaving?');
-    }
-    if (shouldSave) {
-      await saveProjectExplicitly();
-      if (currentProjectId === null) return;
-    }
-  }
-  saveCurrentProject();
-  currentProjectId = null;
-  showScreen('home-screen');
-  renderProjects();
-}
 
 /* PROJECTS */
 function getProjects() {
@@ -3353,6 +3356,186 @@ window.openPrivacy = openPrivacy;
 window.closePrivacy = closePrivacy;
 window.openHelp = openHelp;
 window.closeHelp = closeHelp;
+</script>
+
+<style>
+#dc-loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:999998;display:none;align-items:center;justify-content:center;padding:24px;}
+#dc-loading-overlay.active{display:flex;}
+#dc-loading-card{background:white;border-radius:24px;padding:28px 24px;width:100%;max-width:320px;text-align:center;box-shadow:0 30px 60px rgba(0,0,0,0.4);animation:dcLoadIn .32s cubic-bezier(.34,1.56,.64,1);}
+@keyframes dcLoadIn{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+#dc-loading-card .load-spinner{width:52px;height:52px;border:4px solid #E0E7FF;border-top-color:#4F46E5;border-radius:50%;margin:0 auto 16px;animation:dcSpin .9s linear infinite;}
+@keyframes dcSpin{to{transform:rotate(360deg);}}
+#dc-loading-card .load-title{font-size:18px;font-weight:800;color:#1F2937;margin-bottom:8px;}
+#dc-loading-card .load-msg{font-size:13.5px;color:#6B7280;line-height:1.5;margin-bottom:22px;}
+#dc-loading-card .load-ok{width:100%;padding:14px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* ==================== DARK MODE v2 ==================== */
+
+/* --- Toolbar --- */
+body.dark #toolbar { background:#1E293B !important; border-top-color:#334155 !important; }
+body.dark .add-btn { background:rgba(99,102,241,0.2) !important; color:#C7D2FE !important; border-color:rgba(99,102,241,0.45) !important; }
+body.dark .add-btn.more { background:linear-gradient(135deg,#6366F1,#8B5CF6) !important; color:#FFF !important; border-color:transparent !important; }
+
+/* --- Screens bar --- */
+body.dark .screens-bar { background:#1E293B !important; border-color:#334155 !important; }
+body.dark .screen-tab { background:#0F172A !important; color:#94A3B8 !important; border-color:#334155 !important; }
+body.dark .screen-tab.active { background:#4F46E5 !important; color:#FFF !important; }
+
+/* --- Home cards --- */
+body.dark .template-card, body.dark .explore-card, body.dark .tool-card,
+body.dark .project-item, body.dark .library-item {
+  background:#1E293B !important; border-color:#334155 !important;
+}
+body.dark .template-card span, body.dark .explore-name, body.dark .tool-name,
+body.dark .project-name, body.dark .explore-card div { color:#F1F5F9 !important; }
+body.dark .explore-desc, body.dark .project-time, body.dark .project-screens-count { color:#94A3B8 !important; }
+
+/* --- Pro Tip yellow --- */
+body.dark .tip-card { background:linear-gradient(135deg,#78350F,#451A03) !important; border-color:#92400E !important; }
+body.dark .tip-card h4 { color:#FEF3C7 !important; }
+body.dark .tip-card p { color:#FDE68A !important; }
+
+/* --- Section titles --- */
+body.dark .section-title { color:#94A3B8 !important; }
+
+/* --- GUIDE PAGES: colored boxes --- */
+body.dark .guide-content { background:#0F172A !important; }
+body.dark .guide-card { background:#1E293B !important; border-color:#334155 !important; }
+body.dark .guide-card p, body.dark .guide-card li, body.dark .guide-card b, body.dark .guide-card div { color:#F1F5F9 !important; }
+body.dark .guide-card code { background:#0F172A !important; color:#A5B4FC !important; }
+
+/* Guide hero keeps white text */
+body.dark .guide-hero, body.dark .guide-hero * { color:#FFF !important; }
+
+/* FAQ accordion */
+body.dark .faq-item { background:#1E293B !important; border-color:#334155 !important; }
+body.dark .faq-q { color:#F1F5F9 !important; }
+body.dark .faq-a { color:#94A3B8 !important; }
+
+/* Yellow boxes - dark amber bg, light text */
+body.dark [style*="background:#FEF3C7"], body.dark [style*="background:#FDE68A"],
+body.dark [style*="background:#FEF9C3"], body.dark [style*="background:#FFFBEB"] {
+  background:linear-gradient(135deg,#78350F,#451A03) !important;
+  color:#FEF3C7 !important; border-color:#92400E !important;
+}
+body.dark [style*="background:#FEF3C7"] *, body.dark [style*="background:#FDE68A"] *,
+body.dark [style*="background:#FEF9C3"] *, body.dark [style*="background:#FFFBEB"] * { color:#FEF3C7 !important; }
+
+/* Green boxes */
+body.dark [style*="background:#DCFCE7"], body.dark [style*="background:#D1FAE5"],
+body.dark [style*="background:#ECFDF5"] {
+  background:linear-gradient(135deg,#064E3B,#022C22) !important;
+  color:#A7F3D0 !important; border-color:#065F46 !important;
+}
+body.dark [style*="background:#DCFCE7"] *, body.dark [style*="background:#D1FAE5"] * { color:#A7F3D0 !important; }
+
+/* Red boxes */
+body.dark [style*="background:#FEE2E2"], body.dark [style*="background:#FEF2F2"] {
+  background:linear-gradient(135deg,#7F1D1D,#450A0A) !important;
+  color:#FECACA !important; border-color:#991B1B !important;
+}
+body.dark [style*="background:#FEE2E2"] * { color:#FECACA !important; }
+
+/* Blue info boxes */
+body.dark [style*="background:#DBEAFE"], body.dark [style*="background:#E0F2FE"],
+body.dark [style*="background:#F0F9FF"] {
+  background:linear-gradient(135deg,#1E3A8A,#172554) !important;
+  color:#BFDBFE !important; border-color:#1E40AF !important;
+}
+body.dark [style*="background:#DBEAFE"] *, body.dark [style*="background:#E0F2FE"] * { color:#BFDBFE !important; }
+
+/* Inline code in light boxes stays visible */
+body.dark [style*="background:#FEF3C7"] code, body.dark [style*="background:#DCFCE7"] code,
+body.dark [style*="background:#FEE2E2"] code {
+  background:rgba(0,0,0,0.25) !important; color:#FFF !important; padding:2px 6px; border-radius:4px;
+}
+
+/* PHONE PREVIEW - always white/dark text */
+body.dark .phone-frame, body.dark #canvas { background:#FFF !important; }
+body.dark #canvas .android-textview, body.dark #canvas .android-edittext,
+body.dark #canvas .android-checkbox, body.dark #canvas .android-radio,
+body.dark #canvas .android-switch, body.dark #canvas label,
+body.dark #canvas .android-card, body.dark #canvas span:not(.link-badge):not(.resize-hint) {
+  color:#1F2937 !important;
+}
+body.dark #canvas input.android-edittext::placeholder { color:#9CA3AF !important; }
+body.dark #canvas .android-card { background:#FFF !important; border-color:#F1F5F9 !important; }
+body.dark #canvas .android-image { background:#E5E7EB !important; color:#9CA3AF !important; }
+body.dark #canvas .android-divider, body.dark #canvas .android-progress { background:#E5E7EB !important; }
+body.dark #canvas .switch-track { background:#CBD5E1 !important; }
+body.dark #canvas .switch-track.on { background:var(--android-primary) !important; }
+body.dark #canvas .android-btn, body.dark #canvas button, body.dark #canvas .android-btn * { color:#FFF !important; }
+body.dark #canvas .actions button { color:#1F2937 !important; background:#FFF !important; }
+body.dark .phone-frame .app-bar, body.dark .phone-frame .app-bar * { color:#FFF !important; }
+body.dark .phone-frame .status-bar, body.dark .phone-frame .status-bar * { color:#FFF !important; }
+
+/* Modals */
+body.dark .bottom-panel { background:#1E293B !important; color:#F1F5F9 !important; }
+body.dark .panel-header h3 { color:#F1F5F9 !important; }
+body.dark .form-group label { color:#94A3B8 !important; }
+body.dark .form-group input, body.dark .form-group select, body.dark .form-group textarea {
+  background:#0F172A !important; color:#F1F5F9 !important; border-color:#334155 !important;
+}
+
+/* Icons */
+body.dark .icon-btn { background:rgba(99,102,241,0.2) !important; color:#C7D2FE !important; }
+body.dark .back-btn { background:#1E293B !important; border-color:#334155 !important; }
+body.dark .back-btn svg { stroke:#F1F5F9 !important; }
+</style>
+<div id="dc-loading-overlay">
+<div id="dc-loading-card">
+<div class="load-spinner"></div>
+<div class="load-title">DroidCraft</div>
+<div class="load-msg" id="dc-loading-msg">Page is loading...</div>
+<button class="load-ok" onclick="dcCloseLoading()">OK</button>
+</div>
+</div>
+<script>
+function dcShowLoading(name){var o=document.getElementById('dc-loading-overlay');var m=document.getElementById('dc-loading-msg');if(!o||!m){alert('DroidCraft: '+name+' is loading...');return;}m.textContent=name+' is loading...';o.classList.add('active');}
+function dcCloseLoading(){var o=document.getElementById('dc-loading-overlay');if(o)o.classList.remove('active');}
+
+function editAccountName() {
+  var user = JSON.parse(localStorage.getItem('droidCraftUser') || '{}');
+  var users = JSON.parse(localStorage.getItem('droidCraftUsersDB') || '[]');
+
+  function applyName(n) {
+    if (!n || !n.trim()) return;
+    n = n.trim();
+    user.name = n;
+    localStorage.setItem('droidCraftUser', JSON.stringify(user));
+    var i = users.findIndex(function(x) { return x.email === user.email; });
+    if (i > -1) { users[i].name = n; localStorage.setItem('droidCraftUsersDB', JSON.stringify(users)); }
+    var el;
+    el = document.getElementById('greeting-name'); if (el) el.textContent = n;
+    el = document.getElementById('home-avatar'); if (el) el.textContent = n.charAt(0).toUpperCase();
+    el = document.getElementById('account-name'); if (el) el.textContent = n;
+    el = document.getElementById('account-avatar'); if (el) el.textContent = n.charAt(0).toUpperCase();
+  }
+
+  // Try prompt first (uses WebChromeClient in APK)
+  try {
+    var r = prompt('Enter your new name:', user.name || '');
+    if (r !== null) { applyName(r); return; }
+  } catch (e) {}
+
+  // Fallback: inline modal
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.innerHTML = '<div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:320px;">' +
+    '<div style="font-size:17px;font-weight:800;color:#1F2937;margin-bottom:14px;">Edit Name</div>' +
+    '<input id="inp-name" type="text" value="' + (user.name || '').replace(/"/g,'&quot;') + '" style="width:100%;padding:14px;border:2px solid #E5E7EB;border-radius:12px;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:16px;">' +
+    '<div style="display:flex;gap:10px;">' +
+    '<button id="inp-cancel" style="flex:1;padding:12px;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;font-weight:700;">Cancel</button>' +
+    '<button id="inp-ok" style="flex:2;padding:12px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:700;">Save</button>' +
+    '</div></div>';
+  document.body.appendChild(ov);
+  var inp = document.getElementById('inp-name');
+  inp.focus(); inp.select();
+  document.getElementById('inp-cancel').onclick = function() { document.body.removeChild(ov); };
+  document.getElementById('inp-ok').onclick = function() { var v = inp.value; document.body.removeChild(ov); applyName(v); };
+  inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('inp-ok').click(); });
+}
+window.editAccountName = editAccountName;
 </script>
 </body>
 </html>
