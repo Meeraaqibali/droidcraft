@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Theme-aware colors that flip automatically with dark / light mode.
 class DC {
@@ -80,6 +81,35 @@ class AppTheme {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       }),
+      systemNavigationBarColor:
+          isDark ? const Color(0xFF1E293B) : Colors.white,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor:
+          isDark ? const Color(0xFF1E293B) : Colors.white,
+    );
+  }
+
+  /// Sets the status bar + system navigation bar to match the current theme.
+  /// Call this whenever the theme mode changes.
+  static void applySystemUi(bool isDark) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor:
+          isDark ? const Color(0xFF1E293B) : Colors.white,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor:
+          isDark ? const Color(0xFF1E293B) : Colors.white,
+    ));
+  }
+
+  /// Enables edge-to-edge drawing (nav bar sits on top of content).
+  static Future<void> enableEdgeToEdge() async {
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
     );
   }
 }

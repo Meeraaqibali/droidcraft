@@ -9,6 +9,7 @@ import '../renderer.dart';
 import '../services.dart';
 import '../theme.dart';
 import '../widgets/phone_frame.dart';
+import '../widgets/dirty_guard.dart';
 import '../widgets/pressable.dart';
 import 'code_editor_screen.dart';
 import 'flow_screen.dart';
@@ -25,6 +26,7 @@ class _EditorScreenState extends State<EditorScreen> {
   late Project _project;
   String? _screenId;
   String? _selectedId;
+  bool _dirty = false;
 
   ScreenModel get _screen => _project.screens
       .firstWhere((s) => s.id == _screenId, orElse: () => _project.screens.first);
@@ -37,6 +39,7 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _persist() async {
+    _dirty = true;
     _project.updatedAt = DateTime.now();
     try {
       await context.read<ProjectService>().save(_project);
@@ -131,7 +134,10 @@ class _EditorScreenState extends State<EditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return DirtyGuard(
+      isDirty: _dirty,
+      onSave: () async { await _persist(); _dirty = false; },
+      child: Scaffold(
       appBar: AppBar(
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),

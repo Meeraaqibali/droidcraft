@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../ideas.dart';
 import '../models.dart';
 import '../nav.dart';
 import '../services.dart';
@@ -7,6 +8,7 @@ import '../templates.dart';
 import '../theme.dart';
 import 'editor_screen.dart';
 import '../widgets/pressable.dart';
+import '../widgets/exit_confirm.dart';
 import '../widgets/animated_list.dart';
 import 'guide_screen.dart';
 import 'settings_screen.dart';
@@ -32,7 +34,8 @@ class HomeScreen extends StatelessWidget {
     final exploreKeys =
         templates.keys.where((k) => !_quickKeys.contains(k)).toList();
 
-    return Scaffold(
+    return ExitConfirm(
+      child: Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
         title: Row(mainAxisSize: MainAxisSize.min, children: const [
@@ -134,6 +137,7 @@ class HomeScreen extends StatelessWidget {
           else
             ...projSvc.projects.map((p) => _projectTile(context, p, projSvc)),
         ],
+      ),
       ),
     );
   }
@@ -307,14 +311,14 @@ class HomeScreen extends StatelessWidget {
       );
 
   Widget _emptyState(BuildContext ctx) => Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: DC.surface(ctx),
           border: Border.all(color: DC.border(ctx), width: 2),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(children: [
-          Icon(Icons.phone_android, size: 48, color: DC.muted(ctx)),
+          Icon(Icons.phone_android, size: 44, color: DC.muted(ctx)),
           const SizedBox(height: 12),
           Text('No projects yet',
               style: TextStyle(
@@ -322,25 +326,96 @@ class HomeScreen extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: DC.text(ctx))),
           const SizedBox(height: 6),
-          Text('Create your first Android UI mockup in seconds.',
+          Text('Start with a blank canvas or try an idea below.',
               style: TextStyle(fontSize: 12, color: DC.muted(ctx)),
               textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            OutlinedButton.icon(
-              onPressed: () => Navigator.of(ctx)
-                  .push(slideRoute(const GuideScreen())),
-              icon: const Icon(Icons.menu_book_outlined, size: 18),
-              label: const Text('How to use'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22)),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: () => _newProjectSheet(ctx, 'blank'),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Create Project'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+            ),
+          ),
+          const SizedBox(height: 26),
+          Row(children: [
+            Container(
+              width: 4,
+              height: 14,
+              decoration: BoxDecoration(
+                color: AppTheme.primary,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const SizedBox(width: 8),
+            Text('WHAT CAN YOU BUILD?',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: DC.muted(ctx),
+                    letterSpacing: 1)),
           ]),
+          const SizedBox(height: 14),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.35,
+            children: ideas.map((idea) => _ideaCard(ctx, idea)).toList(),
+          ),
         ]),
       );
+
+  Widget _ideaCard(BuildContext ctx, IdeaDef idea) {
+    return Pressable(
+      onTap: () => _launchIdea(ctx, idea),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: DC.inputFill(ctx),
+          border: Border.all(color: DC.border(ctx)),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: idea.color.withOpacity(0.14),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(idea.icon, color: idea.color, size: 20),
+            ),
+            const Spacer(),
+            Text(idea.title,
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: DC.text(ctx))),
+            const SizedBox(height: 2),
+            Text(idea.subtitle,
+                style: TextStyle(color: DC.muted(ctx), fontSize: 10),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchIdea(BuildContext ctx, IdeaDef idea) async {
+    final svc = ctx.read<ProjectService>();
+    final p = await svc.create('${idea.title} App', 'idea_${idea.key}', idea.build());
+    if (!ctx.mounted) return;
+    Navigator.of(ctx).push(slideRoute(EditorScreen(project: p)));
+  }
 
   Widget _projectTile(BuildContext ctx, Project p, ProjectService svc) => Container(
         margin: const EdgeInsets.only(bottom: 10),
