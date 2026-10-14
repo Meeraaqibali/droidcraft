@@ -6,6 +6,9 @@ import '../registry.dart';
 import '../renderer.dart';
 import '../services.dart';
 import '../widgets/phone_frame.dart';
+import 'code_editor_screen.dart';
+import 'flow_screen.dart';
+import '../nav.dart';
 import 'preview_screen.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -133,6 +136,8 @@ class _EditorScreenState extends State<EditorScreen> {
         title: Text(_project.name,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         actions: [
+          IconButton(icon: const Icon(Icons.code), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CodeEditorScreen(project: _project, screen: _screen, onChanged: () { if (mounted) setState(() {}); _persist(); }))), tooltip: 'Edit Code'),
+          IconButton(icon: const Icon(Icons.account_tree_outlined), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FlowScreen(project: _project, onChanged: () { if (mounted) setState(() {}); _persist(); }))), tooltip: 'App Flow'),
           IconButton(icon: const Icon(Icons.download_outlined), onPressed: () => showExportSheet(context, _project, _screen), tooltip: 'Export'),
           IconButton(icon: const Icon(Icons.add), onPressed: _addScreen),
           Padding(
