@@ -12,10 +12,19 @@ class AuthService extends ChangeNotifier {
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
+    final savedUrl = sp.getString('serverUrl');
+    if (savedUrl != null && savedUrl.isNotEmpty) Api.baseUrl = savedUrl;
     _token = sp.getString('token');
     final u = sp.getString('user');
     if (u != null) user = Map<String, dynamic>.from(jsonDecode(u));
     api.setToken(_token);
+    notifyListeners();
+  }
+
+  Future<void> setServerUrl(String url) async {
+    Api.baseUrl = url.trim();
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('serverUrl', Api.baseUrl);
     notifyListeners();
   }
 

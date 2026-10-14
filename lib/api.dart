@@ -10,8 +10,10 @@ class ApiException implements Exception {
 }
 
 class Api {
-  static const String baseUrl =
-      String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
+  static String baseUrl = const String.fromEnvironment(
+    'API_BASE',
+    defaultValue: 'http://10.0.2.2:8000',
+  );
 
   String? _token;
   void setToken(String? t) => _token = t;

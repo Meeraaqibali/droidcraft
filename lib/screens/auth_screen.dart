@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../api.dart';
 import '../services.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -8,8 +9,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabs;
+class _AuthScreenState extends State<AuthScreen> {
+  int _tabIndex = 0;
   bool _busy = false;
   bool _showPass = false;
 
@@ -20,14 +21,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   final _suPass = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-  }
-
-  @override
   void dispose() {
-    _tabs.dispose();
     _loginEmail.dispose();
     _loginPass.dispose();
     _suName.dispose();
@@ -47,6 +41,45 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       );
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _editServer() async {
+    final ctrl = TextEditingController(text: Api.baseUrl);
+    final v = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Server URL'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Enter the IP:port of your Python backend (running in Termux).',
+                style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                hintText: 'http://192.168.1.42:8000',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (v != null && v.isNotEmpty) {
+      await context.read<AuthService>().setServerUrl(v);
+      if (mounted) setState(() {});
     }
   }
 
@@ -79,7 +112,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               const Text('Design Android apps visually - right from your phone.',
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                   textAlign: TextAlign.center),
-              const SizedBox(height: 22),
+              const SizedBox(height: 18),
               const Text('QUICK DEMO ACCOUNTS',
                   style: TextStyle(
                       color: Colors.white70,
@@ -91,7 +124,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 _quickAccount('Alex', 'alex@demo.com', auth),
                 _quickAccount('Sam', 'sam@demo.com', auth),
               ]),
-              const SizedBox(height: 22),
+              const SizedBox(height: 18),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -101,36 +134,88 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   ],
                 ),
                 padding: const EdgeInsets.all(8),
-                child: Column(children: [
-                  TabBar(
-                    controller: _tabs,
-                    indicator: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8)]),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    labelColor: const Color(0xFF4F46E5),
-                    unselectedLabelColor: const Color(0xFF6B7280),
-                    tabs: const [
-                      Tab(text: 'Sign In', height: 44),
-                      Tab(text: 'Sign Up', height: 44),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 500,
-                    child: TabBarView(
-                      controller: _tabs,
-                      children: [_loginTab(auth), _signupTab(auth)],
-                    ),
-                  ),
-                ]),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildToggle(),
+                    const SizedBox(height: 4),
+                    _tabIndex == 0 ? _loginTab(auth) : _signupTab(auth),
+                  ],
+                ),
               ),
+              const SizedBox(height: 14),
+              _serverRow(),
+              const SizedBox(height: 10),
+              const Text('DroidCraft · Craft Android UI in seconds',
+                  style: TextStyle(color: Colors.white70, fontSize: 12)),
             ]),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildToggle() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(children: [
+        _toggleBtn('Sign In', 0),
+        _toggleBtn('Sign Up', 1),
+      ]),
+    );
+  }
+
+  Widget _toggleBtn(String label, int i) {
+    final on = _tabIndex == i;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _tabIndex = i),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: on ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: on
+                ? const [BoxShadow(color: Color(0x14000000), blurRadius: 6)]
+                : null,
+          ),
+          child: Text(label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: on ? const Color(0xFF4F46E5) : const Color(0xFF6B7280),
+              )),
+        ),
+      ),
+    );
+  }
+
+  Widget _serverRow() {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      const Icon(Icons.dns_outlined, color: Colors.white70, size: 14),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(Api.baseUrl,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      ),
+      const SizedBox(width: 8),
+      GestureDetector(
+        onTap: _editServer,
+        child: const Text('change',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                decoration: TextDecoration.underline)),
+      ),
+    ]);
   }
 
   Widget _quickAccount(String name, String email, AuthService auth) {
@@ -160,12 +245,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   Widget _loginTab(AuthService auth) {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(children: [
-        _field(
-            controller: _loginEmail,
-            icon: Icons.email_outlined,
-            hint: 'Email address'),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        _field(controller: _loginEmail, icon: Icons.email_outlined, hint: 'Email address'),
         const SizedBox(height: 14),
         _field(
             controller: _loginPass,
@@ -177,7 +259,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   color: Colors.grey),
               onPressed: () => setState(() => _showPass = !_showPass),
             )),
-        const SizedBox(height: 22),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           height: 52,
@@ -204,8 +286,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   Widget _signupTab(AuthService auth) {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(children: [
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
         _field(controller: _suName, icon: Icons.person_outline, hint: 'Full name'),
         const SizedBox(height: 14),
         _field(controller: _suEmail, icon: Icons.email_outlined, hint: 'Email address'),
@@ -220,7 +302,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   color: Colors.grey),
               onPressed: () => setState(() => _showPass = !_showPass),
             )),
-        const SizedBox(height: 22),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           height: 52,
