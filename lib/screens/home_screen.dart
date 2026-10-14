@@ -131,6 +131,17 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 26),
           _tipCard(context),
           const SizedBox(height: 26),
+          _sectionTitle(context, 'WHAT CAN YOU BUILD?'),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.35,
+            children: ideas.map((idea) => _ideaCard(ctx, idea)).toList(),
+          ),
+          const SizedBox(height: 26),
           _sectionTitle(context, 'YOUR PROJECTS'),
           if (projSvc.projects.isEmpty)
             _emptyState(context)
@@ -326,10 +337,10 @@ class HomeScreen extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: DC.text(ctx))),
           const SizedBox(height: 6),
-          Text('Start with a blank canvas or try an idea below.',
+          Text('Tap a template above or start blank.',
               style: TextStyle(fontSize: 12, color: DC.muted(ctx)),
               textAlign: TextAlign.center),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => _newProjectSheet(ctx, 'blank'),
             icon: const Icon(Icons.add, size: 18),
@@ -341,36 +352,9 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24)),
             ),
           ),
-          const SizedBox(height: 26),
-          Row(children: [
-            Container(
-              width: 4,
-              height: 14,
-              decoration: BoxDecoration(
-                color: AppTheme.primary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text('WHAT CAN YOU BUILD?',
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: DC.muted(ctx),
-                    letterSpacing: 1)),
-          ]),
-          const SizedBox(height: 14),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1.35,
-            children: ideas.map((idea) => _ideaCard(ctx, idea)).toList(),
-          ),
         ]),
       );
+
 
   Widget _ideaCard(BuildContext ctx, IdeaDef idea) {
     return Pressable(

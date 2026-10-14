@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,8 @@ class _EditorScreenState extends State<EditorScreen> {
   late Project _project;
   String? _screenId;
   String? _selectedId;
+  String? _snapshot;
+  bool _edited = false;
 
   ScreenModel get _screen => _project.screens
       .firstWhere((s) => s.id == _screenId, orElse: () => _project.screens.first);
@@ -34,9 +37,59 @@ class _EditorScreenState extends State<EditorScreen> {
     super.initState();
     _project = widget.project;
     _screenId = _project.screens.isNotEmpty ? _project.screens.first.id : null;
+    _snapshot = jsonEncode(_project.toJson());
+  }
+
+  Future<void> _handleBack() async {
+    if (!_edited) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+    final action = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Save changes?'),
+        content: const Text('You edited this project. Save your changes or discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'cancel'),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'discard'),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+            child: const Text('Discard'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, 'save'),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (!mounted) return;
+    if (action == 'save') {
+      await _persist();
+      if (!mounted) return;
+      setState(() => _edited = false);
+      if (mounted) Navigator.pop(context);
+    } else if (action == 'discard') {
+      if (_snapshot != null) {
+        try {
+          final restored = Project.fromJson(
+              Map<String, dynamic>.from(jsonDecode(_snapshot!)));
+          await context.read<ProjectService>().save(restored);
+        } catch (_) {}
+      }
+      if (!mounted) return;
+      setState(() => _edited = false);
+      if (mounted) Navigator.pop(context);
+    }
   }
 
   Future<void> _persist() async {
+    _edited = true;
     _project.updatedAt = DateTime.now();
     try {
       await context.read<ProjectService>().save(_project);
@@ -131,11 +184,17 @@ class _EditorScreenState extends State<EditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: !_edited,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        await _handleBack();
+      },
+      child: Scaffold(
       appBar: AppBar(
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context)),
+            onPressed: _handleBack),
         title: Text(_project.name,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         actions: [
@@ -346,6 +405,7 @@ class _EditorScreenState extends State<EditorScreen> {
           ]),
         ),
         ),
+      ),
       ),
     );
   }
