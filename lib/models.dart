@@ -25,29 +25,45 @@ class ComponentModel {
 class ScreenModel {
   final String id;
   String name;
+  String? next;
   List<ComponentModel> components;
+  Map<String, String> codeOverrides;
 
-  ScreenModel({required this.id, required this.name, List<ComponentModel>? components})
-      : components = components ?? [];
+  ScreenModel({
+    required this.id,
+    required this.name,
+    this.next,
+    List<ComponentModel>? components,
+    Map<String, String>? codeOverrides,
+  })  : components = components ?? [],
+        codeOverrides = codeOverrides ?? {};
 
   factory ScreenModel.fromJson(Map<String, dynamic> j) => ScreenModel(
         id: j['id'],
         name: j['name'],
+        next: j['next'] as String?,
         components: (j['components'] as List? ?? [])
             .map((e) => ComponentModel.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
+        codeOverrides: (j['codeOverrides'] as Map?)?.map(
+          (k, v) => MapEntry(k.toString(), v.toString()),
+        ) ?? {},
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'next': next,
         'components': components.map((c) => c.toJson()).toList(),
+        'codeOverrides': codeOverrides,
       };
 
   ScreenModel clone() => ScreenModel(
         id: uid(),
         name: '$name copy',
+        next: null,
         components: components.map((c) => c.clone()).toList(),
+        codeOverrides: Map.from(codeOverrides),
       );
 }
 

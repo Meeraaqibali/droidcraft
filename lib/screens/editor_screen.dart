@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models.dart';
+import '../exporter.dart';
 import '../registry.dart';
 import '../renderer.dart';
 import '../services.dart';
@@ -132,6 +133,7 @@ class _EditorScreenState extends State<EditorScreen> {
         title: Text(_project.name,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         actions: [
+          IconButton(icon: const Icon(Icons.download_outlined), onPressed: () => showExportSheet(context, _project, _screen), tooltip: 'Export'),
           IconButton(icon: const Icon(Icons.add), onPressed: _addScreen),
           Padding(
             padding: const EdgeInsets.only(right: 12),

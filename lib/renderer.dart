@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'models.dart';
 
@@ -17,6 +18,32 @@ TextAlign _alignOf(String? a) =>
 Alignment _crossOf(String? a) =>
     a == 'center' ? Alignment.center : a == 'right' ? Alignment.centerRight : Alignment.centerLeft;
 
+BoxFit _fitOf(String? f) {
+  switch (f) {
+    case 'contain': return BoxFit.contain;
+    case 'fill': return BoxFit.fill;
+    case 'fitWidth': return BoxFit.fitWidth;
+    case 'fitHeight': return BoxFit.fitHeight;
+    case 'none': return BoxFit.none;
+    default: return BoxFit.cover;
+  }
+}
+
+TextStyle _textStyle(Map<String, dynamic> p, Color color, double size, {double? defaultWeight}) {
+  final bold = p['bold'] == true;
+  final italic = p['italic'] == true;
+  final underline = p['underline'] == true;
+  return TextStyle(
+    color: color,
+    fontSize: size,
+    height: (p['lineHeight'] as num?)?.toDouble() ?? 1.4,
+    letterSpacing: (p['letterSpacing'] as num?)?.toDouble() ?? 0,
+    fontWeight: bold ? FontWeight.w800 : (defaultWeight != null ? FontWeight.w700 : FontWeight.normal),
+    fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+    decoration: underline ? TextDecoration.underline : TextDecoration.none,
+  );
+}
+
 class ComponentRenderer extends StatelessWidget {
   final ComponentModel component;
   const ComponentRenderer({super.key, required this.component});
@@ -34,12 +61,12 @@ class ComponentRenderer extends StatelessWidget {
       case 'heading':
         return Text(p['text']?.toString() ?? 'Heading',
             textAlign: textAlign,
-            style: TextStyle(color: color, fontSize: size, fontWeight: FontWeight.w800, letterSpacing: -0.4));
+            style: _textStyle(p, color, size, defaultWeight: 700));
 
       case 'text':
         return Text(p['text']?.toString() ?? 'Text',
             textAlign: textAlign,
-            style: TextStyle(color: color, fontSize: size, height: 1.5));
+            style: _textStyle(p, color, size));
 
       case 'button':
         return Align(
@@ -52,7 +79,11 @@ class ComponentRenderer extends StatelessWidget {
               boxShadow: const [BoxShadow(color: Color(0x476200EE), blurRadius: 12, offset: Offset(0, 4))],
             ),
             child: Text(p['text']?.toString() ?? 'Button',
-                style: TextStyle(color: color, fontSize: size, fontWeight: FontWeight.w700)),
+                style: TextStyle(
+                  color: color,
+                  fontSize: size,
+                  fontWeight: p['bold'] == true ? FontWeight.w800 : FontWeight.w700,
+                )),
           ),
         );
 
@@ -69,13 +100,48 @@ class ComponentRenderer extends StatelessWidget {
         );
 
       case 'image':
-        return Container(
-          height: 120,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE5E7EB),
-            borderRadius: BorderRadius.circular(8),
+        final path = (p['path'] ?? '').toString();
+        final w = (p['width'] as num?)?.toDouble() ?? 0;
+        final h = (p['height'] as num?)?.toDouble() ?? 160;
+        final fit = _fitOf(p['fit']?.toString());
+        final widthWidget = w > 0 ? w : double.infinity;
+
+        if (path.isEmpty) {
+          return Container(
+            width: widthWidget == double.infinity ? null : widthWidget,
+            height: h,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE5E7EB),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(
+              child: Icon(Icons.image_outlined, size: 40, color: Color(0xFF9CA3AF)),
+            ),
+          );
+        }
+        final file = File(path);
+        if (!file.existsSync()) {
+          return Container(
+            width: widthWidget == double.infinity ? null : widthWidget,
+            height: h,
+            color: const Color(0xFFFFE4E6),
+            child: const Center(child: Text('Image not found', style: TextStyle(color: Colors.red))),
+          );
+        }
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            file,
+            width: widthWidget == double.infinity ? null : widthWidget,
+            height: h,
+            fit: fit,
+            errorBuilder: (_, __, ___) => Container(
+              width: widthWidget == double.infinity ? null : widthWidget,
+              height: h,
+              color: const Color(0xFFFFE4E6),
+              child: const Center(child: Text('Failed to load', style: TextStyle(color: Colors.red))),
+            ),
           ),
-          child: const Center(child: Icon(Icons.image, color: Colors.grey, size: 40)),
         );
 
       case 'avatar':
