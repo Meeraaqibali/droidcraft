@@ -600,6 +600,91 @@ class _EditorScreenState extends State<EditorScreen> {
                         ),
                       ],
                     ),
+                  if (def.fields.contains('bold'))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 6),
+                            child: Text('STYLE',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.grey,
+                                    letterSpacing: 0.8)),
+                          ),
+                          Row(children: [
+                            Expanded(
+                              child: _styleToggle('Bold', Icons.format_bold,
+                                  props['bold'] == true,
+                                  () => setSt(() => props['bold'] = props['bold'] != true)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _styleToggle('Italic', Icons.format_italic,
+                                  props['italic'] == true,
+                                  () => setSt(() => props['italic'] = props['italic'] != true)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _styleToggle('Underline', Icons.format_underlined,
+                                  props['underline'] == true,
+                                  () => setSt(() => props['underline'] = props['underline'] != true)),
+                            ),
+                          ]),
+                        ],
+                      ),
+                    ),
+                  if (def.fields.contains('letterSpacing'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                              'Letter spacing - ${((props['letterSpacing'] ?? 0) as num).toStringAsFixed(1)}px',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey)),
+                        ),
+                        Slider(
+                          value: ((props['letterSpacing'] ?? 0) as num).toDouble(),
+                          min: -2,
+                          max: 8,
+                          divisions: 20,
+                          activeColor: const Color(0xFF4F46E5),
+                          onChanged: (v) => setSt(() =>
+                              props['letterSpacing'] = double.parse(v.toStringAsFixed(1))),
+                        ),
+                      ],
+                    ),
+                  if (def.fields.contains('lineHeight'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                              'Line height - ${((props['lineHeight'] ?? 1.4) as num).toStringAsFixed(1)}',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey)),
+                        ),
+                        Slider(
+                          value: ((props['lineHeight'] ?? 1.4) as num).toDouble(),
+                          min: 0.8,
+                          max: 3.0,
+                          divisions: 22,
+                          activeColor: const Color(0xFF4F46E5),
+                          onChanged: (v) => setSt(() =>
+                              props['lineHeight'] = double.parse(v.toStringAsFixed(1))),
+                        ),
+                      ],
+                    ),
                   if (def.fields.contains('on'))
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -650,6 +735,36 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() {});
       _persist();
     }
+  }
+
+  Widget _styleToggle(String label, IconData icon, bool on, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: on ? const Color(0xFFEEF2FF) : const Color(0xFFF5F6FA),
+          border: Border.all(
+            color: on ? const Color(0xFF4F46E5) : const Color(0xFFE5E7EB),
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(children: [
+          Icon(icon,
+              size: 20,
+              color: on ? const Color(0xFF4F46E5) : Colors.grey.shade700),
+          const SizedBox(height: 4),
+          Text(label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: on ? const Color(0xFF4F46E5) : Colors.grey.shade700,
+              )),
+        ]),
+      ),
+    );
   }
 
   Widget _input(String label, String value, ValueChanged<String> onChanged) =>
