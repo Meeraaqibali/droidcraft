@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 20),
           _section(context, 'BACKUP & RESTORE'),
           _card(context, children: [
-            Pressable(onTap: () {}, child: ListTile(
+            ListTile(
               leading: const Icon(Icons.upload_outlined,
                   color: AppTheme.primary),
               title: Text('Export backup',
