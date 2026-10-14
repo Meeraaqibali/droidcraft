@@ -63,13 +63,35 @@ class _CodeEditorScreenState extends State<CodeEditorScreen>
   void _save() {
     widget.screen.codeOverrides['xml'] = _xmlCtrl.text;
     widget.screen.codeOverrides['kotlin'] = _ktCtrl.text;
+
+    // 1. XML drives the canvas: parse it and replace all components
+    final parsed = parseXmlToComponents(_xmlCtrl.text);
+    if (parsed.isNotEmpty) {
+      widget.screen.components.clear();
+      widget.screen.components.addAll(parsed);
+    }
+
+    // 2. Kotlin overrides on top of the XML result
+    final ktApplied = _applyKotlin(widget.screen.components);
+
     widget.onChanged();
     setState(() {
       _xmlDirty = false;
       _ktDirty = false;
     });
+
+    final parts = <String>[];
+    if (parsed.isNotEmpty) {
+      parts.add('${parsed.length} widget${parsed.length == 1 ? '' : 's'}');
+    }
+    if (ktApplied > 0) parts.add('$ktApplied Kotlin edit${ktApplied == 1 ? '' : 's'}');
+    final msg = parts.isEmpty
+        ? 'Saved - nothing recognizable to sync'
+        : 'Saved - synced ${parts.join(" + ")}';
+
     ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Code saved'), backgroundColor: Color(0xFF10B981)));
+      SnackBar(content: Text(msg), backgroundColor: const Color(0xFF10B981)),
+    );
   }
 
   void _reset() {
