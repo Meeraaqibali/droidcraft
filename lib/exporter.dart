@@ -230,6 +230,7 @@ String exportXml(ScreenModel s) {
       '      android:layout_width="match_parent"\n'
       '      android:layout_height="wrap_content"\n'
       '      android:orientation="vertical"\n'
+      '      android:background="${_argb(s.bg)}"\n'
       '      android:padding="16dp">\n\n'
       '$body\n\n'
       '  </LinearLayout>\n'

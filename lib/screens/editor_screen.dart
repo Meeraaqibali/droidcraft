@@ -190,6 +190,7 @@ class _EditorScreenState extends State<EditorScreen> {
             padding: const EdgeInsets.only(bottom: 120),
             child: PhoneFrame(
               title: _screen.name,
+              screenBg: parseColor(_screen.bg, Colors.white),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: _screen.components.isEmpty
@@ -944,6 +945,62 @@ class _EditorScreenState extends State<EditorScreen> {
         ]),
       );
 
+  Future<String?> _pickScreenColor(String current) {
+    const options = [
+      '#FFFFFF', '#F5F6FA', '#111827', '#0F172A',
+      '#6200EE', '#4F46E5', '#EF4444', '#10B981',
+      '#F59E0B', '#FEF3C7', '#FCE7F3', '#DBEAFE',
+    ];
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: DC.surface(context),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Screen background',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: DC.text(context))),
+            const SizedBox(height: 4),
+            Text('Choose a background color for this screen',
+                style: TextStyle(color: DC.muted(context), fontSize: 12)),
+            const SizedBox(height: 18),
+            Wrap(spacing: 10, runSpacing: 10, children: options.map((c) {
+              final sel = c.toLowerCase() == current.toLowerCase();
+              return GestureDetector(
+                onTap: () => Navigator.pop(context, c),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: parseColor(c, Colors.white),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: sel ? AppTheme.primary : DC.border(context),
+                      width: sel ? 3 : 1.5,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x0A000000), blurRadius: 4),
+                    ],
+                  ),
+                  child: sel
+                      ? const Icon(Icons.check, color: Colors.white, size: 22)
+                      : null,
+                ),
+              );
+            }).toList()),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _openScreenMenu(String sid) async {
     final idx = _project.screens.indexWhere((s) => s.id == sid);
     if (idx < 0) return;
@@ -966,6 +1023,10 @@ class _EditorScreenState extends State<EditorScreen> {
                     style: TextStyle(color: DC.muted(context))),
                 const SizedBox(height: 16),
                 ListTile(
+                    leading: const Icon(Icons.palette_outlined),
+                    title: const Text('Background color'),
+                    onTap: () => Navigator.pop(context, 'bg')),
+                ListTile(
                     leading: const Icon(Icons.edit),
                     title: const Text('Rename'),
                     onTap: () => Navigator.pop(context, 'rename')),
@@ -985,7 +1046,13 @@ class _EditorScreenState extends State<EditorScreen> {
               ]),
             ));
 
-    if (action == 'rename') {
+    if (action == 'bg') {
+      final pick = await _pickScreenColor(s.bg);
+      if (pick != null) {
+        setState(() => s.bg = pick);
+        _persist();
+      }
+    } else if (action == 'rename') {
       final v =
           await _prompt('Rename screen', 'Give this screen a new name', s.name);
       if (v != null && v.isNotEmpty) {

@@ -86,6 +86,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           padding: const EdgeInsets.only(bottom: 130),
           child: PhoneFrame(
             title: _screen.name,
+            screenBg: parseColor(_screen.bg, Colors.white),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: _screen.components.isEmpty

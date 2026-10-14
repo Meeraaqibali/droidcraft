@@ -26,6 +26,7 @@ class ScreenModel {
   final String id;
   String name;
   String? next;
+  String bg;
   List<ComponentModel> components;
   Map<String, String> codeOverrides;
 
@@ -33,6 +34,7 @@ class ScreenModel {
     required this.id,
     required this.name,
     this.next,
+    this.bg = '#FFFFFF',
     List<ComponentModel>? components,
     Map<String, String>? codeOverrides,
   })  : components = components ?? [],
@@ -42,6 +44,7 @@ class ScreenModel {
         id: j['id'],
         name: j['name'],
         next: j['next'] as String?,
+        bg: (j['bg'] as String?) ?? '#FFFFFF',
         components: (j['components'] as List? ?? [])
             .map((e) => ComponentModel.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
@@ -54,6 +57,7 @@ class ScreenModel {
         'id': id,
         'name': name,
         'next': next,
+        'bg': bg,
         'components': components.map((c) => c.toJson()).toList(),
         'codeOverrides': codeOverrides,
       };
@@ -62,6 +66,7 @@ class ScreenModel {
         id: uid(),
         name: '$name copy',
         next: null,
+        bg: bg,
         components: components.map((c) => c.clone()).toList(),
         codeOverrides: Map.from(codeOverrides),
       );
