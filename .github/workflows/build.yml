@@ -19,10 +19,19 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.24.0'
+          flutter-version: '3.27.1'
 
       - name: Scaffold android platform files
         run: flutter create --platforms=android --org com.droidcraft --project-name droidcraft .
+
+      - name: Bump Kotlin version to 1.9.22
+        run: |
+          sed -i 's|id "org.jetbrains.kotlin.android" version "[^"]*"|id "org.jetbrains.kotlin.android" version "1.9.22"|' android/settings.gradle
+          sed -i 's|ext.kotlin_version = "[^"]*"|ext.kotlin_version = "1.9.22"|' android/build.gradle || true
+          echo "--- android/settings.gradle ---"
+          cat android/settings.gradle
+          echo "--- android/build.gradle ---"
+          cat android/build.gradle || true
 
       - name: Install dependencies
         run: flutter pub get
