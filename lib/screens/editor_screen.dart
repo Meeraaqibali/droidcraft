@@ -17,7 +17,8 @@ import 'preview_screen.dart';
 
 class EditorScreen extends StatefulWidget {
   final Project project;
-  const EditorScreen({super.key, required this.project});
+  final bool isNew;
+  const EditorScreen({super.key, required this.project, this.isNew = false});
   @override
   State<EditorScreen> createState() => _EditorScreenState();
 }
@@ -28,6 +29,7 @@ class _EditorScreenState extends State<EditorScreen> {
   String? _selectedId;
   String? _snapshot;
   bool _edited = false;
+  late bool _isNew;
 
   ScreenModel get _screen => _project.screens
       .firstWhere((s) => s.id == _screenId, orElse: () => _project.screens.first);
@@ -38,9 +40,59 @@ class _EditorScreenState extends State<EditorScreen> {
     _project = widget.project;
     _screenId = _project.screens.isNotEmpty ? _project.screens.first.id : null;
     _snapshot = jsonEncode(_project.toJson());
+    _isNew = widget.isNew;
   }
 
   Future<void> _handleBack() async {
+    if (_isNew) {
+      // Brand new project — ask before saving
+      final action = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Save this project?'),
+          content: Text(
+              '"${_project.name}" is a new project. Would you like to save it to your projects?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'discard'),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+              child: const Text('Discard'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, 'save'),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (action == 'save') {
+        try {
+          await context.read<ProjectService>().create(
+                _project.name,
+                _project.template,
+                _project.screens,
+              );
+        } catch (_) {}
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Project saved'),
+              backgroundColor: Color(0xFF10B981),
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } else if (action == 'discard') {
+        if (mounted) Navigator.pop(context);
+      }
+      return;
+    }
+
     if (!_edited) {
       if (mounted) Navigator.pop(context);
       return;
@@ -91,6 +143,7 @@ class _EditorScreenState extends State<EditorScreen> {
   Future<void> _persist() async {
     _edited = true;
     _project.updatedAt = DateTime.now();
+    if (_isNew) return; // don't auto-save new projects
     try {
       await context.read<ProjectService>().save(_project);
     } catch (_) {}

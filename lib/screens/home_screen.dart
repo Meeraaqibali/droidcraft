@@ -394,11 +394,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _launchIdea(BuildContext ctx, IdeaDef idea) async {
-    final svc = ctx.read<ProjectService>();
-    final p = await svc.create('${idea.title} App', 'idea_${idea.key}', idea.build());
-    if (!ctx.mounted) return;
-    Navigator.of(ctx).push(slideRoute(EditorScreen(project: p)));
+  void _launchIdea(BuildContext ctx, IdeaDef idea) {
+    final p = Project(
+      id: uid(),
+      name: '${idea.title} App',
+      template: 'idea_${idea.key}',
+      screens: idea.build(),
+    );
+    Navigator.of(ctx).push(
+      slideRoute(EditorScreen(project: p, isNew: true)),
+    );
   }
 
   Widget _projectTile(BuildContext ctx, Project p, ProjectService svc) => Container(
