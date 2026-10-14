@@ -332,7 +332,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _accountSheet(BuildContext ctx) {
-    final auth = context.read<AuthService>();
+    final auth = ctx.read<AuthService>();
     showModalBottomSheet(
         context: ctx,
         builder: (_) => Padding(
