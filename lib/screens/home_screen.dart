@@ -19,7 +19,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthService>();
     final projSvc = context.watch<ProjectService>();
     final theme = context.watch<ThemeService>();
 
@@ -37,145 +36,129 @@ class HomeScreen extends StatelessWidget {
             icon: Icon(theme.mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
             onPressed: () => context.read<ThemeService>().toggle(),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: GestureDetector(
-              onTap: () => _accountSheet(context),
-              child: CircleAvatar(
-                backgroundColor: const Color(0xFF4F46E5),
-                child: Text((auth.user?['name'] ?? 'U')[0].toUpperCase(),
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w800)),
-              ),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => context.read<ProjectService>().refresh(),
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text('Hello, ${auth.user?['name'] ?? 'there'} 👋',
-                style: const TextStyle(
-                    fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-            const SizedBox(height: 4),
-            const Text("Let's build something beautiful today.",
-                style: TextStyle(fontSize: 14, color: Colors.grey)),
-            const SizedBox(height: 22),
-            InkWell(
-              onTap: () => _newProjectSheet(context, null),
-              borderRadius: BorderRadius.circular(22),
-              child: Container(
-                padding: const EdgeInsets.all(26),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x594F46E5), blurRadius: 24, offset: Offset(0, 12))
-                  ],
-                ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Start a new project',
-                      style: TextStyle(
-                          color: Colors.white, fontSize: 19, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 6),
-                  const Text('Pick a template and start dragging components onto the canvas.',
-                      style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30)),
-                    child: const Text('+ Create Project',
-                        style: TextStyle(
-                            color: Color(0xFF4F46E5), fontWeight: FontWeight.w700)),
-                  ),
-                ]),
-              ),
-            ),
-            const SizedBox(height: 22),
-            Row(children: [
-              _stat('Projects', projSvc.projects.length),
-              const SizedBox(width: 10),
-              _stat('Screens', projSvc.totalScreens),
-              const SizedBox(width: 10),
-              _stat('Widgets', projSvc.totalComponents),
-            ]),
-            const SizedBox(height: 26),
-            _sectionTitle('QUICK START'),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.6,
-              children: ['blank', 'login', 'profile', 'dashboard'].map((k) {
-                final t = templates[k]!;
-                return _templateCard(context, k, t);
-              }).toList(),
-            ),
-            const SizedBox(height: 26),
-            _sectionTitle('EXPLORE TEMPLATES'),
-            SizedBox(
-              height: 130,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: templates.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (_, i) {
-                  final t = templates.values.elementAt(i);
-                  return SizedBox(
-                      width: 150,
-                      child: _templateCard(context, t.key, t, compact: true));
-                },
-              ),
-            ),
-            const SizedBox(height: 26),
-            Container(
-              padding: const EdgeInsets.all(18),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text('Hello 👋',
+              style: TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+          const SizedBox(height: 4),
+          const Text("Let's build something beautiful today.",
+              style: TextStyle(fontSize: 14, color: Colors.grey)),
+          const SizedBox(height: 22),
+          InkWell(
+            onTap: () => _newProjectSheet(context, null),
+            borderRadius: BorderRadius.circular(22),
+            child: Container(
+              padding: const EdgeInsets.all(26),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)]),
-                borderRadius: BorderRadius.circular(18),
+                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: const [
-                  BoxShadow(color: Color(0x26F59E0B), blurRadius: 20, offset: Offset(0, 8))
+                  BoxShadow(color: Color(0x594F46E5), blurRadius: 24, offset: Offset(0, 12))
                 ],
               ),
-              child: Row(children: [
-                const Text('💡', style: TextStyle(fontSize: 28)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-                    Text('Pro tip',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF78350F),
-                            fontSize: 13)),
-                    SizedBox(height: 4),
-                    Text(
-                        'Select any widget on the canvas, then tap it again to open properties and link it to another screen.',
-                        style: TextStyle(
-                            color: Color(0xFF92400E), fontSize: 12, height: 1.4)),
-                  ]),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Start a new project',
+                    style: TextStyle(
+                        color: Colors.white, fontSize: 19, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                const Text('Pick a template and start dragging components onto the canvas.',
+                    style: TextStyle(color: Colors.white70, fontSize: 13)),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
+                  decoration: BoxDecoration(
+                      color: Colors.white, borderRadius: BorderRadius.circular(30)),
+                  child: const Text('+ Create Project',
+                      style: TextStyle(
+                          color: Color(0xFF4F46E5), fontWeight: FontWeight.w700)),
                 ),
               ]),
             ),
-            const SizedBox(height: 26),
-            _sectionTitle('YOUR PROJECTS'),
-            if (projSvc.projects.isEmpty)
-              _emptyState(context)
-            else
-              ...projSvc.projects.map((p) => _projectTile(context, p, projSvc)),
-          ],
-        ),
+          ),
+          const SizedBox(height: 22),
+          Row(children: [
+            _stat('Projects', projSvc.projects.length),
+            const SizedBox(width: 10),
+            _stat('Screens', projSvc.totalScreens),
+            const SizedBox(width: 10),
+            _stat('Widgets', projSvc.totalComponents),
+          ]),
+          const SizedBox(height: 26),
+          _sectionTitle('QUICK START'),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 1.6,
+            children: ['blank', 'login', 'profile', 'dashboard'].map((k) {
+              final t = templates[k]!;
+              return _templateCard(context, k, t);
+            }).toList(),
+          ),
+          const SizedBox(height: 26),
+          _sectionTitle('EXPLORE TEMPLATES'),
+          SizedBox(
+            height: 130,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: templates.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) {
+                final t = templates.values.elementAt(i);
+                return SizedBox(
+                    width: 150,
+                    child: _templateCard(context, t.key, t, compact: true));
+              },
+            ),
+          ),
+          const SizedBox(height: 26),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)]),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(color: Color(0x26F59E0B), blurRadius: 20, offset: Offset(0, 8))
+              ],
+            ),
+            child: Row(children: [
+              const Text('💡', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+                  Text('Pro tip',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF78350F),
+                          fontSize: 13)),
+                  SizedBox(height: 4),
+                  Text(
+                      'Select any widget on the canvas, then tap it again to open properties and link it to another screen.',
+                      style: TextStyle(
+                          color: Color(0xFF92400E), fontSize: 12, height: 1.4)),
+                ]),
+              ),
+            ]),
+          ),
+          const SizedBox(height: 26),
+          _sectionTitle('YOUR PROJECTS'),
+          if (projSvc.projects.isEmpty)
+            _emptyState(context)
+          else
+            ...projSvc.projects.map((p) => _projectTile(context, p, projSvc)),
+        ],
       ),
     );
   }
@@ -331,35 +314,6 @@ class HomeScreen extends StatelessWidget {
             ));
   }
 
-  void _accountSheet(BuildContext ctx) {
-    final auth = ctx.read<AuthService>();
-    showModalBottomSheet(
-        context: ctx,
-        builder: (_) => Padding(
-              padding: const EdgeInsets.all(22),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(auth.user?['name'] ?? 'Guest',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w800)),
-                Text(auth.user?['email'] ?? '',
-                    style: const TextStyle(color: Colors.grey)),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444)),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      auth.logout();
-                    },
-                    child: const Text('Sign Out'),
-                  ),
-                ),
-              ]),
-            ));
-  }
-
   void _newProjectSheet(BuildContext ctx, String? preset) {
     final nameCtrl = TextEditingController(
         text: preset != null ? '${templates[preset]!.name} App' : '');
@@ -414,9 +368,7 @@ class HomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: on
-                                ? const Color(0xFFEEF2FF)
-                                : Colors.white,
+                            color: on ? const Color(0xFFEEF2FF) : Colors.white,
                             border: Border.all(
                                 color: on
                                     ? const Color(0xFF4F46E5)
@@ -459,19 +411,13 @@ class HomeScreen extends StatelessWidget {
                           final tpl = templates[selected]!;
                           final svc = ctx.read<ProjectService>();
                           Navigator.pop(ctx);
-                          try {
-                            final p = await svc.create(
-                                name.isEmpty ? tpl.name : name,
-                                selected,
-                                tpl.build());
-                            if (!ctx.mounted) return;
-                            Navigator.of(ctx).push(MaterialPageRoute(
-                                builder: (_) => EditorScreen(project: p)));
-                          } catch (e) {
-                            if (!ctx.mounted) return;
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text('Failed: $e')));
-                          }
+                          final p = await svc.create(
+                              name.isEmpty ? tpl.name : name,
+                              selected,
+                              tpl.build());
+                          if (!ctx.mounted) return;
+                          Navigator.of(ctx).push(MaterialPageRoute(
+                              builder: (_) => EditorScreen(project: p)));
                         },
                         child: const Text('Create'),
                       ),
