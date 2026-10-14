@@ -36,21 +36,30 @@ class _FlowScreenState extends State<FlowScreen> {
           Text('Long-press the handle to drag a screen. Order rebuilds the chain.',
               style: TextStyle(color: DC.muted(context), fontSize: 12)),
           const SizedBox(height: 20),
-          ReorderableListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            buildDefaultDragHandles: false,
-            itemCount: screens.length,
-            onReorder: (oldI, newI) {
-              if (newI > oldI) newI -= 1;
-              setState(() {
-                final moved = screens.removeAt(oldI);
-                screens.insert(newI, moved);
-                _rebuildChain();
-              });
-              widget.onChanged();
-            },
-            itemBuilder: (ctx, i) => _screenNode(i, screens[i]),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween(begin: const Offset(0, 0.05), end: Offset.zero)
+                      .chain(CurveTween(curve: Curves.easeOutCubic))
+                      .animate(anim),
+                  child: child,
+                ),
+              ),
+              child: Column(
+                key: ValueKey(screens.map((s) => s.id).join(',')),
+                children: List.generate(
+                  screens.length,
+                  (i) => _screenNode(i, screens[i]),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(

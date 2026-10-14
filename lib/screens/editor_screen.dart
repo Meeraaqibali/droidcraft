@@ -317,6 +317,7 @@ class _EditorScreenState extends State<EditorScreen> {
               child: PhoneFrame(
               title: _screen.name,
               screenBg: parseColor(_screen.bg, Colors.white),
+              barBg: parseColor(_screen.barBg, const Color(0xFF6200EE)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: _screen.components.isEmpty
@@ -1216,8 +1217,12 @@ class _EditorScreenState extends State<EditorScreen> {
                 const SizedBox(height: 16),
                 ListTile(
                     leading: const Icon(Icons.palette_outlined),
-                    title: const Text('Background color'),
+                    title: const Text('Screen background'),
                     onTap: () => Navigator.pop(context, 'bg')),
+                ListTile(
+                    leading: const Icon(Icons.colorize_outlined),
+                    title: const Text('App bar color'),
+                    onTap: () => Navigator.pop(context, 'barBg')),
                 ListTile(
                     leading: const Icon(Icons.edit),
                     title: const Text('Rename'),
@@ -1242,6 +1247,12 @@ class _EditorScreenState extends State<EditorScreen> {
       final pick = await _pickScreenColor(s.bg);
       if (pick != null) {
         setState(() => s.bg = pick);
+        _persist();
+      }
+    } else if (action == 'barBg') {
+      final pick = await _pickScreenColor(s.barBg);
+      if (pick != null) {
+        setState(() => s.barBg = pick);
         _persist();
       }
     } else if (action == 'rename') {
