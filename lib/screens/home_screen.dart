@@ -6,6 +6,9 @@ import '../services.dart';
 import '../templates.dart';
 import '../theme.dart';
 import 'editor_screen.dart';
+import '../widgets/pressable.dart';
+import '../widgets/animated_list.dart';
+import 'guide_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -43,6 +46,12 @@ class HomeScreen extends StatelessWidget {
                 ? Icons.light_mode
                 : Icons.dark_mode),
             onPressed: () => context.read<ThemeService>().toggle(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.menu_book_outlined),
+            tooltip: 'User Guide',
+            onPressed: () =>
+                Navigator.of(context).push(slideRoute(const GuideScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -129,9 +138,9 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _createCard(BuildContext ctx) => InkWell(
+  Widget _createCard(BuildContext ctx) => Pressable(
         onTap: () => _newProjectSheet(ctx, null),
-        borderRadius: BorderRadius.circular(22),
+        scale: 0.98,
         child: Container(
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
@@ -203,8 +212,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _templateCard(BuildContext ctx, String key, TemplateDef t,
       {bool compact = false}) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return Pressable(
       onTap: () => _newProjectSheet(ctx, key),
       child: Container(
         padding: EdgeInsets.all(compact ? 12 : 16),
@@ -239,8 +247,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _tool(BuildContext ctx, IconData icon, String label, VoidCallback onTap) =>
       Expanded(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+        child: Pressable(
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -319,14 +326,19 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: DC.muted(ctx)),
               textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => _newProjectSheet(ctx, 'blank'),
-            style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.primary,
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(ctx)
+                  .push(slideRoute(const GuideScreen())),
+              icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: const Text('How to use'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22))),
-            child: const Text('Create Project'),
-          ),
+                    borderRadius: BorderRadius.circular(22)),
+              ),
+            ),
+          ]),
         ]),
       );
 

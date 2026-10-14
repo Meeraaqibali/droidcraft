@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../backup.dart';
 import '../services.dart';
 import '../theme.dart';
+import '../widgets/pressable.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -35,32 +36,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ]),
           const SizedBox(height: 20),
-          _section(context, 'FONT STYLE'),
-          _card(
-            context,
-            children: AppTheme.fontOptions.entries.map((e) {
-              final on = theme.font == e.value;
-              return ListTile(
-                onTap: () => context.read<ThemeService>().setFont(e.value),
-                leading: Icon(
-                    on
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
-                    color: on ? AppTheme.primary : DC.muted(context)),
-                title: Text(e.key,
-                    style: TextStyle(
-                        fontFamily: e.value,
-                        color: DC.text(context),
-                        fontWeight: on ? FontWeight.w700 : FontWeight.w500)),
-                subtitle: Text('The quick brown fox',
-                    style: TextStyle(
-                        fontFamily: e.value,
-                        fontSize: 12,
-                        color: DC.muted(context))),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
           _section(context, 'DATA'),
           _card(context, children: [
             ListTile(
@@ -86,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 20),
           _section(context, 'BACKUP & RESTORE'),
           _card(context, children: [
-            ListTile(
+            Pressable(onTap: () {}, child: ListTile(
               leading: const Icon(Icons.upload_outlined,
                   color: AppTheme.primary),
               title: Text('Export backup',

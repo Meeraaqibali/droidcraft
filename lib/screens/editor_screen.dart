@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../exporter.dart';
 import '../models.dart';
@@ -8,6 +9,7 @@ import '../renderer.dart';
 import '../services.dart';
 import '../theme.dart';
 import '../widgets/phone_frame.dart';
+import '../widgets/pressable.dart';
 import 'code_editor_screen.dart';
 import 'flow_screen.dart';
 import 'preview_screen.dart';
@@ -139,8 +141,7 @@ class _EditorScreenState extends State<EditorScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.code),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CodeEditorScreen(
+            onPressed: () => Navigator.of(context).push(slideUpRoute(CodeEditorScreen(
                     project: _project,
                     screen: _screen,
                     onChanged: () {
@@ -151,13 +152,12 @@ class _EditorScreenState extends State<EditorScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.account_tree_outlined),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => FlowScreen(
-                    project: _project,
-                    onChanged: () {
-                      if (mounted) setState(() {});
-                      _persist();
-                    }))),
+            onPressed: () => Navigator.of(context).push(slideRoute(FlowScreen(
+                project: _project,
+                onChanged: () {
+                  if (mounted) setState(() {});
+                  _persist();
+                }))),
             tooltip: 'App Flow',
           ),
           IconButton(
@@ -186,9 +186,23 @@ class _EditorScreenState extends State<EditorScreen> {
         _buildScreenTabs(),
         Divider(height: 1, color: DC.border(context)),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 120),
-            child: PhoneFrame(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween(begin: const Offset(0.05, 0), end: Offset.zero)
+                    .chain(CurveTween(curve: Curves.easeOutCubic))
+                    .animate(anim),
+                child: child,
+              ),
+            ),
+            child: SingleChildScrollView(
+              key: ValueKey(_screen.id),
+              padding: const EdgeInsets.only(bottom: 120),
+              child: PhoneFrame(
               title: _screen.name,
               screenBg: parseColor(_screen.bg, Colors.white),
               child: Padding(
@@ -292,6 +306,7 @@ class _EditorScreenState extends State<EditorScreen> {
                           );
                         }),
                       ),
+              ),
               ),
             ),
           ),
@@ -565,6 +580,8 @@ class _EditorScreenState extends State<EditorScreen> {
                   Text('Edit widget properties - changes apply instantly',
                       style: TextStyle(color: DC.muted(ctx), fontSize: 12)),
                   const SizedBox(height: 18),
+                  if (c.type == 'image')
+                    _imagePickerRow(ctx, c, props, setSt),
                   if (def.fields.contains('text'))
                     _input(ctx, 'Text', props['text']?.toString() ?? '',
                         (v) => setSt(() => props['text'] = v)),
@@ -721,6 +738,65 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() {});
       _persist();
     }
+  }
+
+  Widget _imagePickerRow(BuildContext ctx, ComponentModel c,
+      Map<String, dynamic> props, void Function(void Function()) setSt) {
+    final path = (props['path'] ?? '').toString();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text('IMAGE',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: DC.muted(ctx),
+                    letterSpacing: 0.8)),
+          ),
+          Row(children: [
+            Expanded(
+              child: FilledButton.icon(
+                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                onPressed: () async {
+                  final picker = ImagePicker();
+                  final x = await picker.pickImage(
+                      source: ImageSource.gallery,
+                      maxWidth: 1600);
+                  if (x != null) {
+                    setSt(() => props['path'] = x.path);
+                  }
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                label: Text(path.isEmpty ? 'Pick from gallery' : 'Change image'),
+              ),
+            ),
+            if (path.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: AppTheme.danger),
+                onPressed: () => setSt(() => props['path'] = ''),
+              ),
+            ],
+          ]),
+          if (path.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(path.split('/').last,
+                  style: TextStyle(
+                      fontSize: 10, color: DC.muted(ctx)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _sliderRow(BuildContext ctx, String label, String valueText,

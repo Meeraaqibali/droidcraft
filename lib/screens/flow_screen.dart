@@ -132,7 +132,11 @@ class _FlowScreenState extends State<FlowScreen> {
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5)),
                 ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
+              if (i > 0)
+                _miniBtn(Icons.keyboard_arrow_up, () => _move(i, i - 1)),
+              if (i < screens.length - 1)
+                _miniBtn(Icons.keyboard_arrow_down, () => _move(i, i + 1)),
               ReorderableDragStartListener(
                 index: i,
                 child: Padding(
@@ -217,6 +221,25 @@ class _FlowScreenState extends State<FlowScreen> {
         ),
       ]),
     );
+  }
+
+  Widget _miniBtn(IconData icon, VoidCallback onTap) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          padding: const EdgeInsets.all(3),
+          child: Icon(icon, size: 20, color: DC.muted(context)),
+        ),
+      );
+
+  void _move(int from, int to) {
+    if (to < 0 || to >= screens.length) return;
+    setState(() {
+      final m = screens.removeAt(from);
+      screens.insert(to, m);
+      _rebuildChain();
+    });
+    widget.onChanged();
   }
 
   void _renameScreen(ScreenModel s) {
