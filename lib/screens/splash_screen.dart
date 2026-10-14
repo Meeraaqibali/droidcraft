@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1600));
+        vsync: this, duration: const Duration(milliseconds: 2200));
 
     _logoScale = Tween(begin: 0.4, end: 1.0)
         .chain(CurveTween(curve: Curves.elasticOut))
@@ -43,10 +43,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _c.forward();
 
-    Future.delayed(const Duration(milliseconds: 2200), () {
+    Future.delayed(const Duration(milliseconds: 3600), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
+        transitionDuration: const Duration(milliseconds: 700),
         pageBuilder: (_, __, ___) => const HomeScreen(),
         transitionsBuilder: (_, a, __, child) => FadeTransition(
           opacity: a,

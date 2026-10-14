@@ -9,7 +9,6 @@ import '../renderer.dart';
 import '../services.dart';
 import '../theme.dart';
 import '../widgets/phone_frame.dart';
-import '../widgets/dirty_guard.dart';
 import '../widgets/pressable.dart';
 import 'code_editor_screen.dart';
 import 'flow_screen.dart';
@@ -26,7 +25,6 @@ class _EditorScreenState extends State<EditorScreen> {
   late Project _project;
   String? _screenId;
   String? _selectedId;
-  bool _dirty = false;
 
   ScreenModel get _screen => _project.screens
       .firstWhere((s) => s.id == _screenId, orElse: () => _project.screens.first);
@@ -39,7 +37,6 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _persist() async {
-    _dirty = true;
     _project.updatedAt = DateTime.now();
     try {
       await context.read<ProjectService>().save(_project);
@@ -134,10 +131,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DirtyGuard(
-      isDirty: _dirty,
-      onSave: () async { await _persist(); _dirty = false; },
-      child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -323,8 +317,10 @@ class _EditorScreenState extends State<EditorScreen> {
         backgroundColor: AppTheme.primary,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
         decoration: BoxDecoration(
           color: DC.surface(context),
           border: Border(top: BorderSide(color: DC.border(context))),
@@ -349,8 +345,7 @@ class _EditorScreenState extends State<EditorScreen> {
             ),
           ]),
         ),
-      ),
-    ));
+    );
   }
 
   Widget _buildScreenTabs() {
