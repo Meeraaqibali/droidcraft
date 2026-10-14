@@ -50,6 +50,16 @@ class _CodeEditorScreenState extends State<CodeEditorScreen>
     super.dispose();
   }
 
+  int _applyKotlin(List<ComponentModel> comps) {
+    final before = comps.map((c) => c.props.toString()).toList();
+    parseKotlinOverrides(_ktCtrl.text, comps);
+    var changed = 0;
+    for (var i = 0; i < comps.length; i++) {
+      if (comps[i].props.toString() != before[i]) changed++;
+    }
+    return changed;
+  }
+
   void _save() {
     widget.screen.codeOverrides['xml'] = _xmlCtrl.text;
     widget.screen.codeOverrides['kotlin'] = _ktCtrl.text;
