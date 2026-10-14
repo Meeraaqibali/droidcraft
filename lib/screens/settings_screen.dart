@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../backup.dart';
 import '../services.dart';
 import '../theme.dart';
 
@@ -59,6 +60,18 @@ class SettingsScreen extends StatelessWidget {
                   style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w600)),
               subtitle: const Text('Permanently delete every saved project', style: TextStyle(fontSize: 12)),
               onTap: () => _confirmClear(context, projSvc),
+            ),
+          ]),
+          const SizedBox(height: 20),
+          _section('BACKUP & RESTORE'),
+          _card(children: [
+            ListTile(
+              leading: const Icon(Icons.upload_outlined, color: Color(0xFF4F46E5)),
+              title: const Text('Export backup', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('Copy all projects as JSON text', style: TextStyle(fontSize: 12)),
+              onTap: () => Backup.showBackupSheet(context, projSvc.projects, (list) async {
+                await projSvc.replaceAll(list);
+              }),
             ),
           ]),
           const SizedBox(height: 20),

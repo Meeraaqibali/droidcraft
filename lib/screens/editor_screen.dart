@@ -559,6 +559,50 @@ class _EditorScreenState extends State<EditorScreen> {
                         ),
                       ],
                     ),
+                  if (def.fields.contains('radius'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text('Corner radius - ${(props['radius'] ?? 0).toInt()}px',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey)),
+                        ),
+                        Slider(
+                          value: ((props['radius'] ?? 0) as num).toDouble(),
+                          min: 0,
+                          max: 40,
+                          divisions: 40,
+                          activeColor: const Color(0xFF4F46E5),
+                          onChanged: (v) => setSt(() => props['radius'] = v.round()),
+                        ),
+                      ],
+                    ),
+                  if (def.fields.contains('padding'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text('Padding - ${(props['padding'] ?? 0).toInt()}px',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey)),
+                        ),
+                        Slider(
+                          value: ((props['padding'] ?? 0) as num).toDouble(),
+                          min: 0,
+                          max: 24,
+                          divisions: 24,
+                          activeColor: const Color(0xFF4F46E5),
+                          onChanged: (v) => setSt(() => props['padding'] = v.round()),
+                        ),
+                      ],
+                    ),
                   if (def.fields.contains('on'))
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,

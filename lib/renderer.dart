@@ -12,6 +12,18 @@ Color parseColor(dynamic v, [Color fallback = const Color(0xFF111827)]) {
   return fallback;
 }
 
+double _rad(Map<String, dynamic> p, double fallback) {
+  final v = (p['radius'] as num?)?.toDouble();
+  if (v == null) return fallback;
+  return v;
+}
+
+double _pad(Map<String, dynamic> p, double fallback) {
+  final v = (p['padding'] as num?)?.toDouble();
+  if (v == null) return fallback;
+  return v;
+}
+
 TextAlign _alignOf(String? a) =>
     a == 'center' ? TextAlign.center : a == 'right' ? TextAlign.right : TextAlign.left;
 
@@ -59,23 +71,32 @@ class ComponentRenderer extends StatelessWidget {
 
     switch (component.type) {
       case 'heading':
-        return Text(p['text']?.toString() ?? 'Heading',
-            textAlign: textAlign,
-            style: _textStyle(p, color, size, defaultWeight: 700));
+        return Padding(
+          padding: EdgeInsets.all(_pad(p, 0)),
+          child: Text(p['text']?.toString() ?? 'Heading',
+              textAlign: textAlign,
+              style: _textStyle(p, color, size, defaultWeight: 700)),
+        );
 
       case 'text':
-        return Text(p['text']?.toString() ?? 'Text',
-            textAlign: textAlign,
-            style: _textStyle(p, color, size));
+        return Padding(
+          padding: EdgeInsets.all(_pad(p, 0)),
+          child: Text(p['text']?.toString() ?? 'Text',
+              textAlign: textAlign,
+              style: _textStyle(p, color, size)),
+        );
 
       case 'button':
         return Align(
           alignment: cross,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: 26 + _pad(p, 0),
+              vertical: 12 + _pad(p, 0),
+            ),
             decoration: BoxDecoration(
               color: parseColor(p['bg'], const Color(0xFF6200EE)),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(_rad(p, 10)),
               boxShadow: const [BoxShadow(color: Color(0x476200EE), blurRadius: 12, offset: Offset(0, 4))],
             ),
             child: Text(p['text']?.toString() ?? 'Button',
@@ -89,10 +110,10 @@ class ComponentRenderer extends StatelessWidget {
 
       case 'input':
         return Container(
-          padding: const EdgeInsets.all(14),
+          padding: EdgeInsets.all(14 + _pad(p, 0)),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(_rad(p, 8)),
             color: Colors.white,
           ),
           child: Text(p['text']?.toString() ?? 'Input',
@@ -104,55 +125,68 @@ class ComponentRenderer extends StatelessWidget {
         final w = (p['width'] as num?)?.toDouble() ?? 0;
         final h = (p['height'] as num?)?.toDouble() ?? 160;
         final fit = _fitOf(p['fit']?.toString());
-        final widthWidget = w > 0 ? w : double.infinity;
+        final radius = _rad(p, 8);
 
-        if (path.isEmpty) {
-          return Container(
-            width: widthWidget == double.infinity ? null : widthWidget,
-            height: h,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE5E7EB),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(
-              child: Icon(Icons.image_outlined, size: 40, color: Color(0xFF9CA3AF)),
-            ),
-          );
-        }
+        Widget placeholder = Container(
+          width: w > 0 ? w : double.infinity,
+          height: h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5E7EB),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          child: const Center(
+            child: Icon(Icons.image_outlined, size: 40, color: Color(0xFF9CA3AF)),
+          ),
+        );
+
+        if (path.isEmpty) return placeholder;
+
         final file = File(path);
         if (!file.existsSync()) {
           return Container(
-            width: widthWidget == double.infinity ? null : widthWidget,
+            width: w > 0 ? w : double.infinity,
             height: h,
-            color: const Color(0xFFFFE4E6),
-            child: const Center(child: Text('Image not found', style: TextStyle(color: Colors.red))),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE4E6),
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: const Center(
+              child: Text('Image not found', style: TextStyle(color: Colors.red, fontSize: 12)),
+            ),
           );
         }
+
         return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(radius),
           child: Image.file(
             file,
-            width: widthWidget == double.infinity ? null : widthWidget,
+            width: w > 0 ? w : double.infinity,
             height: h,
             fit: fit,
             errorBuilder: (_, __, ___) => Container(
-              width: widthWidget == double.infinity ? null : widthWidget,
+              width: w > 0 ? w : double.infinity,
               height: h,
               color: const Color(0xFFFFE4E6),
-              child: const Center(child: Text('Failed to load', style: TextStyle(color: Colors.red))),
+              child: const Center(
+                child: Text('Failed to load', style: TextStyle(color: Colors.red, fontSize: 12)),
+              ),
             ),
           ),
         );
 
       case 'avatar':
         final s = size * 4;
+        final radius = _rad(p, 0);
+        final pad = _pad(p, 0);
         return Align(
           alignment: cross,
           child: Container(
-            width: s, height: s,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [Color(0xFF6200EE), Color(0xFF9C27B0)]),
+            width: s + pad * 2,
+            height: s + pad * 2,
+            decoration: BoxDecoration(
+              shape: radius > 0 ? BoxShape.rectangle : BoxShape.circle,
+              borderRadius: radius > 0 ? BorderRadius.circular(radius) : null,
+              gradient: const LinearGradient(colors: [Color(0xFF6200EE), Color(0xFF9C27B0)]),
             ),
             child: Center(
               child: Text('A',
@@ -169,10 +203,10 @@ class ComponentRenderer extends StatelessWidget {
 
       case 'card':
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16 + _pad(p, 0)),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(_rad(p, 12)),
             border: Border.all(color: const Color(0xFFF1F5F9)),
             boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2))],
           ),
@@ -190,10 +224,13 @@ class ComponentRenderer extends StatelessWidget {
 
       case 'appbar':
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16 + _pad(p, 0),
+            vertical: 14 + _pad(p, 0),
+          ),
           decoration: BoxDecoration(
             color: parseColor(p['bg'], const Color(0xFF6200EE)),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(_rad(p, 8)),
           ),
           child: Text(p['text']?.toString() ?? 'App Bar',
               style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
@@ -276,10 +313,13 @@ class ComponentRenderer extends StatelessWidget {
         return Align(
           alignment: cross,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            padding: EdgeInsets.symmetric(
+              horizontal: 16 + _pad(p, 0),
+              vertical: 7 + _pad(p, 0),
+            ),
             decoration: BoxDecoration(
               color: parseColor(p['bg'], const Color(0xFF6200EE)),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(_rad(p, 16)),
             ),
             child: Text(p['text']?.toString() ?? 'Chip',
                 style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
@@ -293,7 +333,8 @@ class ComponentRenderer extends StatelessWidget {
             width: 56, height: 56,
             decoration: BoxDecoration(
               color: parseColor(p['bg'], const Color(0xFF6200EE)),
-              shape: BoxShape.circle,
+              shape: _rad(p, 0) > 0 ? BoxShape.rectangle : BoxShape.circle,
+              borderRadius: _rad(p, 0) > 0 ? BorderRadius.circular(_rad(p, 0)) : null,
               boxShadow: const [BoxShadow(color: Color(0x596200EE), blurRadius: 16, offset: Offset(0, 6))],
             ),
             child: const Center(child: Icon(Icons.add, color: Colors.white, size: 28)),
