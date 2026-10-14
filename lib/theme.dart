@@ -81,12 +81,6 @@ class AppTheme {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       }),
-      systemNavigationBarColor:
-          isDark ? const Color(0xFF1E293B) : Colors.white,
-      systemNavigationBarIconBrightness:
-          isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarDividerColor:
-          isDark ? const Color(0xFF1E293B) : Colors.white,
     );
   }
 
