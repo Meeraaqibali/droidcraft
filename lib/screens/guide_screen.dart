@@ -72,7 +72,7 @@ class GuideScreen extends StatelessWidget {
             _paragraph(context,
                 'Install a full Ubuntu inside Termux, then install the Android SDK and Gradle. Heavy but works. Commands:'),
             _code(context,
-                'pkg install proot-distro\nproot-distro install ubuntu\nproot-distro login ubuntu\napt update && apt install -y openjdk-17-jdk wget unzip\nexport ANDROID_HOME=~\\/android-sdk\nmkdir -p \\$ANDROID_HOME/cmdline-tools\nwget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip\nunzip commandlinetools-linux-*.zip -d \\$ANDROID_HOME/cmdline-tools\nyes | \\$ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses\n\\$ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"\ncd /path/to/your/android/project\n./gradlew assembleRelease'),
+                'pkg install proot-distro\nproot-distro install ubuntu\nproot-distro login ubuntu\napt update && apt install -y openjdk-17-jdk wget unzip\nexport ANDROID_HOME=~/android-sdk\nmkdir -p \$ANDROID_HOME/cmdline-tools\nwget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip\nunzip commandlinetools-linux-*.zip -d \$ANDROID_HOME/cmdline-tools\nyes | \$ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses\n\$ANDROID_HOME/cmdline-tools/cmdline-tools/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"\ncd /path/to/your/android/project\n./gradlew assembleRelease'),
           ]),
           const SizedBox(height: 24),
           _sectionTitle(context, 'CREATE A FULL APP FROM YOUR DESIGN'),
