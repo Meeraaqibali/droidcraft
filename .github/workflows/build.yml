@@ -28,13 +28,43 @@ jobs:
         run: |
           sed -i 's|id "org.jetbrains.kotlin.android" version "[^"]*"|id "org.jetbrains.kotlin.android" version "1.9.22"|' android/settings.gradle
           sed -i 's|ext.kotlin_version = "[^"]*"|ext.kotlin_version = "1.9.22"|' android/build.gradle || true
-          echo "--- android/settings.gradle ---"
-          cat android/settings.gradle
-          echo "--- android/build.gradle ---"
-          cat android/build.gradle || true
+
+      - name: Set app display name
+        run: |
+          sed -i 's|android:label="droidcraft"|android:label="DroidCraft"|' android/app/src/main/AndroidManifest.xml
+
+      - name: Generate app icon
+        run: |
+          mkdir -p assets
+          pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw
+          size = 1024
+          img = Image.new('RGBA', (size, size), (0,0,0,0))
+          d = ImageDraw.Draw(img)
+          # rounded purple background
+          d.rounded_rectangle([0,0,size,size], radius=200, fill=(79,70,229,255))
+          # robot body
+          d.rounded_rectangle([230,340,794,760], radius=150, fill=(255,255,255,255))
+          # eyes
+          d.ellipse([370,470,470,570], fill=(79,70,229,255))
+          d.ellipse([554,470,654,570], fill=(79,70,229,255))
+          # smile
+          d.rounded_rectangle([400,640,624,678], radius=18, fill=(79,70,229,255))
+          # antenna
+          d.rounded_rectangle([488,190,536,340], radius=24, fill=(255,255,255,255))
+          # side arms
+          d.rounded_rectangle([150,470,196,650], radius=23, fill=(255,255,255,255))
+          d.rounded_rectangle([828,470,874,650], radius=23, fill=(255,255,255,255))
+          img.save('assets/icon.png')
+          print('icon saved', img.size)
+          PY
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
 
       - name: Build release APK
         run: flutter build apk --release

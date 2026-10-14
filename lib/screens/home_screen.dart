@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         titleSpacing: 16,
         title: Row(mainAxisSize: MainAxisSize.min, children: const [
-          Icon(Icons.smartphone, color: Color(0xFF4F46E5), size: 28),
+          Icon(Icons.android, color: Color(0xFF4F46E5), size: 26),
           SizedBox(width: 8),
           Text('DroidCraft',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
