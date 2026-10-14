@@ -478,10 +478,7 @@ class _EditorScreenState extends State<EditorScreen> {
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(def.icon, size: 24, color: Color(0xFF4F46E5)),
-                                      style: const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w800)),
+                                  Icon(def.icon, size: 24, color: const Color(0xFF4F46E5)),
                                   const SizedBox(height: 6),
                                   Text(def.name,
                                       style: const TextStyle(

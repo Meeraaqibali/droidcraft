@@ -5,11 +5,12 @@ import 'models.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeMode mode = ThemeMode.light;
+  String font = 'Roboto';
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
-    final v = sp.getString('theme') ?? 'light';
-    mode = v == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    mode = sp.getString('theme') == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    font = sp.getString('font') ?? 'Roboto';
     notifyListeners();
   }
 
@@ -19,11 +20,17 @@ class ThemeService extends ChangeNotifier {
     await sp.setString('theme', mode == ThemeMode.dark ? 'dark' : 'light');
     notifyListeners();
   }
+
+  Future<void> setFont(String f) async {
+    font = f;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('font', f);
+    notifyListeners();
+  }
 }
 
 class ProjectService extends ChangeNotifier {
   static const _kProjects = 'dc_projects';
-
   List<Project> projects = [];
 
   Future<void> load() async {
@@ -66,6 +73,24 @@ class ProjectService extends ChangeNotifier {
 
   Future<void> delete(String id) async {
     projects.removeWhere((p) => p.id == id);
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> clearAll() async {
+    projects = [];
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> replaceAll(List<Project> list) async {
+    projects = list;
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> appendAll(List<Project> list) async {
+    projects.addAll(list);
     await _save();
     notifyListeners();
   }
