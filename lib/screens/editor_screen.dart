@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models.dart';
 import '../exporter.dart';
+import '../models.dart';
+import '../nav.dart';
 import '../registry.dart';
 import '../renderer.dart';
 import '../services.dart';
+import '../theme.dart';
 import '../widgets/phone_frame.dart';
 import 'code_editor_screen.dart';
 import 'flow_screen.dart';
-import '../nav.dart';
 import 'preview_screen.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -111,7 +112,7 @@ class _EditorScreenState extends State<EditorScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(sub,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        style: TextStyle(color: DC.muted(context), fontSize: 12)),
                     const SizedBox(height: 12),
                     TextField(controller: ctrl, autofocus: true),
                   ]),
@@ -136,21 +137,45 @@ class _EditorScreenState extends State<EditorScreen> {
         title: Text(_project.name,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         actions: [
-          IconButton(icon: const Icon(Icons.code), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CodeEditorScreen(project: _project, screen: _screen, onChanged: () { if (mounted) setState(() {}); _persist(); }))), tooltip: 'Edit Code'),
-          IconButton(icon: const Icon(Icons.account_tree_outlined), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FlowScreen(project: _project, onChanged: () { if (mounted) setState(() {}); _persist(); }))), tooltip: 'App Flow'),
-          IconButton(icon: const Icon(Icons.download_outlined), onPressed: () => showExportSheet(context, _project, _screen), tooltip: 'Export'),
+          IconButton(
+            icon: const Icon(Icons.code),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => CodeEditorScreen(
+                    project: _project,
+                    screen: _screen,
+                    onChanged: () {
+                      if (mounted) setState(() {});
+                      _persist();
+                    }))),
+            tooltip: 'Edit Code',
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_tree_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => FlowScreen(
+                    project: _project,
+                    onChanged: () {
+                      if (mounted) setState(() {});
+                      _persist();
+                    }))),
+            tooltip: 'App Flow',
+          ),
+          IconButton(
+            icon: const Icon(Icons.download_outlined),
+            onPressed: () => showExportSheet(context, _project, _screen),
+            tooltip: 'Export',
+          ),
           IconButton(icon: const Icon(Icons.add), onPressed: _addScreen),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: FilledButton(
               style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
+                  backgroundColor: AppTheme.primary,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20))),
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) =>
-                      PreviewScreen(project: _project, startId: _screenId))),
+              onPressed: () => Navigator.of(context).push(slideRoute(
+                  PreviewScreen(project: _project, startId: _screenId))),
               child: const Text('Preview',
                   style: TextStyle(fontWeight: FontWeight.w700)),
             ),
@@ -159,7 +184,7 @@ class _EditorScreenState extends State<EditorScreen> {
       ),
       body: Column(children: [
         _buildScreenTabs(),
-        const Divider(height: 1),
+        Divider(height: 1, color: DC.border(context)),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 120),
@@ -168,13 +193,13 @@ class _EditorScreenState extends State<EditorScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: _screen.components.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(40),
+                    ? Padding(
+                        padding: const EdgeInsets.all(40),
                         child: Center(
                             child: Text(
                           'Tap the + button below to place your first widget on this screen.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: DC.muted(context)),
                         )),
                       )
                     : Column(
@@ -207,7 +232,7 @@ class _EditorScreenState extends State<EditorScreen> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       color: selected
-                                          ? const Color(0xFF4F46E5)
+                                          ? AppTheme.primary
                                           : Colors.transparent,
                                       width: 2,
                                     ),
@@ -273,14 +298,14 @@ class _EditorScreenState extends State<EditorScreen> {
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: _openLibrary,
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: AppTheme.primary,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        decoration: BoxDecoration(
+          color: DC.surface(context),
+          border: Border(top: BorderSide(color: DC.border(context))),
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -293,7 +318,7 @@ class _EditorScreenState extends State<EditorScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: FilledButton(
                 style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF4F46E5),
+                    backgroundColor: AppTheme.primary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
                 onPressed: _openLibrary,
@@ -307,83 +332,86 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Widget _buildScreenTabs() {
-    return SizedBox(
-      height: 56,
-      child: Row(children: [
-        Expanded(
-          child: ReorderableListView.builder(
-            scrollDirection: Axis.horizontal,
-            buildDefaultDragHandles: false,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            itemCount: _project.screens.length,
-            onReorder: _onReorderScreens,
-            itemBuilder: (ctx, i) {
-              final s = _project.screens[i];
-              final active = s.id == _screenId;
-              return ReorderableDelayedDragStartListener(
-                key: ValueKey(s.id),
-                index: i,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Material(
-                    color: active
-                        ? const Color(0xFF4F46E5)
-                        : const Color(0xFFF5F6FA),
-                    borderRadius: BorderRadius.circular(20),
-                    child: InkWell(
+    return Container(
+      color: DC.surface(context),
+      child: SizedBox(
+        height: 56,
+        child: Row(children: [
+          Expanded(
+            child: ReorderableListView.builder(
+              scrollDirection: Axis.horizontal,
+              buildDefaultDragHandles: false,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              itemCount: _project.screens.length,
+              onReorder: _onReorderScreens,
+              itemBuilder: (ctx, i) {
+                final s = _project.screens[i];
+                final active = s.id == _screenId;
+                return ReorderableDelayedDragStartListener(
+                  key: ValueKey(s.id),
+                  index: i,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Material(
+                      color: active
+                          ? AppTheme.primary
+                          : DC.subtle(context),
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () => _selectScreen(s.id),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        child: Row(children: [
-                          if (i == 0)
-                            const Padding(
-                              padding: EdgeInsets.only(right: 4),
-                              child: Icon(Icons.star,
-                                  size: 12, color: Colors.amber),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => _selectScreen(s.id),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          child: Row(children: [
+                            if (i == 0)
+                              const Padding(
+                                padding: EdgeInsets.only(right: 4),
+                                child: Icon(Icons.star,
+                                    size: 12, color: Colors.amber),
+                              ),
+                            Text(s.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: active
+                                      ? Colors.white
+                                      : DC.muted(context),
+                                )),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => _openScreenMenu(s.id),
+                              child: Icon(Icons.more_horiz,
+                                  size: 16,
+                                  color: active
+                                      ? Colors.white70
+                                      : DC.muted(context)),
                             ),
-                          Text(s.name,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: active
-                                    ? Colors.white
-                                    : Colors.grey.shade700,
-                              )),
-                          const SizedBox(width: 6),
-                          InkWell(
-                            onTap: () => _openScreenMenu(s.id),
-                            child: Icon(Icons.more_horiz,
-                                size: 16,
-                                color: active
-                                    ? Colors.white70
-                                    : Colors.grey.shade500),
-                          ),
-                        ]),
+                          ]),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: OutlinedButton.icon(
-            onPressed: _addScreen,
-            icon: const Icon(Icons.add, size: 16),
-            label: const Text('Screen',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
+                );
+              },
             ),
           ),
-        ),
-      ]),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: OutlinedButton.icon(
+              onPressed: _addScreen,
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Screen',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -401,8 +429,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(6)),
             child: Icon(icon,
-                size: 16,
-                color: danger ? const Color(0xFFEF4444) : Colors.grey.shade800),
+                size: 16, color: danger ? AppTheme.danger : Colors.grey.shade800),
           ),
         ),
       );
@@ -410,12 +437,12 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget _toolbarBtn(String label, VoidCallback onTap) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: ActionChip(
-          backgroundColor: const Color(0xFFEEF2FF),
+          backgroundColor: AppTheme.primary.withOpacity(0.12),
           label: Text(label,
               style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF4F46E5))),
+                  color: AppTheme.primary)),
           onPressed: onTap,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -432,6 +459,9 @@ class _EditorScreenState extends State<EditorScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: DC.surface(context),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         maxChildSize: 0.95,
@@ -440,11 +470,14 @@ class _EditorScreenState extends State<EditorScreen> {
           controller: scroll,
           padding: const EdgeInsets.all(20),
           children: [
-            const Text('Add Widget',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Text('Add Widget',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: DC.text(ctx))),
             const SizedBox(height: 4),
             Text('Tap a widget to place it on "${_screen.name}"',
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                style: TextStyle(color: DC.muted(ctx), fontSize: 12)),
             const SizedBox(height: 16),
             ...cats.entries.map((e) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,10 +485,10 @@ class _EditorScreenState extends State<EditorScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 12, bottom: 8),
                       child: Text(e.key.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: Colors.grey,
+                              color: DC.muted(ctx),
                               letterSpacing: 1)),
                     ),
                     GridView.count(
@@ -475,20 +508,22 @@ class _EditorScreenState extends State<EditorScreen> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF5F6FA),
-                              border: Border.all(
-                                  color: const Color(0xFFE5E7EB), width: 1.5),
+                              color: DC.subtle(ctx),
+                              border:
+                                  Border.all(color: DC.border(ctx), width: 1.5),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(def.icon, size: 24, color: const Color(0xFF4F46E5)),
+                                  Icon(def.icon,
+                                      size: 24, color: AppTheme.primary),
                                   const SizedBox(height: 6),
                                   Text(def.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontSize: 11,
-                                          fontWeight: FontWeight.w700)),
+                                          fontWeight: FontWeight.w700,
+                                          color: DC.text(ctx))),
                                 ]),
                           ),
                         );
@@ -508,6 +543,9 @@ class _EditorScreenState extends State<EditorScreen> {
     final updated = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: DC.surface(context),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => StatefulBuilder(
         builder: (ctx, setSt) => Padding(
           padding:
@@ -517,197 +555,139 @@ class _EditorScreenState extends State<EditorScreen> {
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(def.name,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text('${def.name}',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: DC.text(ctx))),
                   const SizedBox(height: 4),
-                  const Text('Edit widget properties - changes apply instantly',
-                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text('Edit widget properties - changes apply instantly',
+                      style: TextStyle(color: DC.muted(ctx), fontSize: 12)),
                   const SizedBox(height: 18),
                   if (def.fields.contains('text'))
-                    _input('Text', props['text']?.toString() ?? '',
+                    _input(ctx, 'Text', props['text']?.toString() ?? '',
                         (v) => setSt(() => props['text'] = v)),
                   if (def.fields.contains('color'))
-                    _colorRow(
-                        'Text color',
+                    _colorRow(ctx, 'Text color',
                         props['color']?.toString() ?? '#111827',
                         (v) => setSt(() => props['color'] = v)),
                   if (def.fields.contains('bg'))
-                    _colorRow(
-                        'Background',
+                    _colorRow(ctx, 'Background',
                         props['bg']?.toString() ?? '#6200EE',
                         (v) => setSt(() => props['bg'] = v)),
                   if (def.fields.contains('size'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                              'Size - ${(props['size'] ?? 14)}px',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.grey)),
-                        ),
-                        Slider(
-                          value: ((props['size'] ?? 14) as num).toDouble(),
-                          min: 8,
-                          max: 40,
-                          divisions: 32,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (v) => setSt(
-                              () => props['size'] = v.round()),
-                        ),
-                      ],
-                    ),
+                    _sliderRow(
+                        ctx,
+                        'Size',
+                        '${(props['size'] ?? 14).toInt()}px',
+                        ((props['size'] ?? 14) as num).toDouble(),
+                        8,
+                        40,
+                        32,
+                        (v) => setSt(() => props['size'] = v.round())),
                   if (def.fields.contains('radius'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text('Corner radius - ${(props['radius'] ?? 0).toInt()}px',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.grey)),
-                        ),
-                        Slider(
-                          value: ((props['radius'] ?? 0) as num).toDouble(),
-                          min: 0,
-                          max: 40,
-                          divisions: 40,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (v) => setSt(() => props['radius'] = v.round()),
-                        ),
-                      ],
-                    ),
+                    _sliderRow(
+                        ctx,
+                        'Corner radius',
+                        '${(props['radius'] ?? 0).toInt()}px',
+                        ((props['radius'] ?? 0) as num).toDouble(),
+                        0,
+                        40,
+                        40,
+                        (v) => setSt(() => props['radius'] = v.round())),
                   if (def.fields.contains('padding'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text('Padding - ${(props['padding'] ?? 0).toInt()}px',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.grey)),
-                        ),
-                        Slider(
-                          value: ((props['padding'] ?? 0) as num).toDouble(),
-                          min: 0,
-                          max: 24,
-                          divisions: 24,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (v) => setSt(() => props['padding'] = v.round()),
-                        ),
-                      ],
-                    ),
+                    _sliderRow(
+                        ctx,
+                        'Padding',
+                        '${(props['padding'] ?? 0).toInt()}px',
+                        ((props['padding'] ?? 0) as num).toDouble(),
+                        0,
+                        24,
+                        24,
+                        (v) => setSt(() => props['padding'] = v.round())),
                   if (def.fields.contains('bold'))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 6),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
                             child: Text('STYLE',
                                 style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.grey,
+                                    color: DC.muted(ctx),
                                     letterSpacing: 0.8)),
                           ),
                           Row(children: [
                             Expanded(
-                              child: _styleToggle('Bold', Icons.format_bold,
-                                  props['bold'] == true,
-                                  () => setSt(() => props['bold'] = props['bold'] != true)),
+                              child: _styleToggle(ctx, 'Bold',
+                                  Icons.format_bold, props['bold'] == true,
+                                  () => setSt(() => props['bold'] =
+                                      props['bold'] != true)),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: _styleToggle('Italic', Icons.format_italic,
-                                  props['italic'] == true,
-                                  () => setSt(() => props['italic'] = props['italic'] != true)),
+                              child: _styleToggle(ctx, 'Italic',
+                                  Icons.format_italic, props['italic'] == true,
+                                  () => setSt(() => props['italic'] =
+                                      props['italic'] != true)),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: _styleToggle('Underline', Icons.format_underlined,
+                              child: _styleToggle(ctx, 'Underline',
+                                  Icons.format_underlined,
                                   props['underline'] == true,
-                                  () => setSt(() => props['underline'] = props['underline'] != true)),
+                                  () => setSt(() => props['underline'] =
+                                      props['underline'] != true)),
                             ),
                           ]),
                         ],
                       ),
                     ),
                   if (def.fields.contains('letterSpacing'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                              'Letter spacing - ${((props['letterSpacing'] ?? 0) as num).toStringAsFixed(1)}px',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.grey)),
-                        ),
-                        Slider(
-                          value: ((props['letterSpacing'] ?? 0) as num).toDouble(),
-                          min: -2,
-                          max: 8,
-                          divisions: 20,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (v) => setSt(() =>
-                              props['letterSpacing'] = double.parse(v.toStringAsFixed(1))),
-                        ),
-                      ],
-                    ),
+                    _sliderRow(
+                        ctx,
+                        'Letter spacing',
+                        ((props['letterSpacing'] ?? 0) as num).toStringAsFixed(1),
+                        ((props['letterSpacing'] ?? 0) as num).toDouble(),
+                        -2,
+                        8,
+                        20,
+                        (v) => setSt(() => props['letterSpacing'] =
+                            double.parse(v.toStringAsFixed(1)))),
                   if (def.fields.contains('lineHeight'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                              'Line height - ${((props['lineHeight'] ?? 1.4) as num).toStringAsFixed(1)}',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.grey)),
-                        ),
-                        Slider(
-                          value: ((props['lineHeight'] ?? 1.4) as num).toDouble(),
-                          min: 0.8,
-                          max: 3.0,
-                          divisions: 22,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (v) => setSt(() =>
-                              props['lineHeight'] = double.parse(v.toStringAsFixed(1))),
-                        ),
-                      ],
-                    ),
+                    _sliderRow(
+                        ctx,
+                        'Line height',
+                        ((props['lineHeight'] ?? 1.4) as num).toStringAsFixed(1),
+                        ((props['lineHeight'] ?? 1.4) as num).toDouble(),
+                        0.8,
+                        3.0,
+                        22,
+                        (v) => setSt(() => props['lineHeight'] =
+                            double.parse(v.toStringAsFixed(1)))),
                   if (def.fields.contains('on'))
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Enabled',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      title: Text('Enabled',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: DC.text(ctx))),
                       value: props['on'] == true,
-                      activeColor: const Color(0xFF4F46E5),
+                      activeColor: AppTheme.primary,
                       onChanged: (v) => setSt(() => props['on'] = v),
                     ),
                   if (def.fields.contains('align'))
                     _segRow(
+                        ctx,
                         'Alignment',
                         ['left', 'center', 'right'],
                         props['align']?.toString() ?? 'left',
                         (v) => setSt(() => props['align'] = v)),
                   if (def.fields.contains('link'))
-                    _dropdown(
-                        'Tap → go to screen',
+                    _dropdown(ctx, 'Tap to go to screen',
                         props['link']?.toString() ?? '',
                         _project.screens,
                         (v) => setSt(() => props['link'] = v)),
@@ -726,7 +706,7 @@ class _EditorScreenState extends State<EditorScreen> {
                     const Spacer(),
                     FilledButton(
                       style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4F46E5)),
+                          backgroundColor: AppTheme.primary),
                       onPressed: () => Navigator.pop(ctx, true),
                       child: const Text('Done'),
                     ),
@@ -742,16 +722,44 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  Widget _styleToggle(String label, IconData icon, bool on, VoidCallback onTap) {
+  Widget _sliderRow(BuildContext ctx, String label, String valueText,
+      double value, double min, double max, int divisions, ValueChanged<double> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text('$label - $valueText',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: DC.muted(ctx))),
+        ),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          activeColor: AppTheme.primary,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _styleToggle(BuildContext ctx, String label, IconData icon, bool on,
+      VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: on ? const Color(0xFFEEF2FF) : const Color(0xFFF5F6FA),
+          color: on
+              ? AppTheme.primary.withOpacity(0.12)
+              : DC.subtle(ctx),
           border: Border.all(
-            color: on ? const Color(0xFF4F46E5) : const Color(0xFFE5E7EB),
+            color: on ? AppTheme.primary : DC.border(ctx),
             width: 1.5,
           ),
           borderRadius: BorderRadius.circular(10),
@@ -759,54 +767,64 @@ class _EditorScreenState extends State<EditorScreen> {
         child: Column(children: [
           Icon(icon,
               size: 20,
-              color: on ? const Color(0xFF4F46E5) : Colors.grey.shade700),
+              color: on ? AppTheme.primary : DC.muted(ctx)),
           const SizedBox(height: 4),
           Text(label,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: on ? const Color(0xFF4F46E5) : Colors.grey.shade700,
+                color: on ? AppTheme.primary : DC.muted(ctx),
               )),
         ]),
       ),
     );
   }
 
-  Widget _input(String label, String value, ValueChanged<String> onChanged) =>
+  Widget _input(BuildContext ctx, String label, String value,
+          ValueChanged<String> onChanged) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(label.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey,
+                    color: DC.muted(ctx),
                     letterSpacing: 0.8)),
           ),
           TextFormField(
             initialValue: value,
             onChanged: onChanged,
+            style: TextStyle(color: DC.text(ctx)),
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFFF5F6FA),
+              fillColor: DC.inputFill(ctx),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                      color: Color(0xFFE5E7EB), width: 1.5)),
+                  borderSide: BorderSide(
+                      color: DC.border(ctx), width: 1.5)),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                      color: Color(0xFFE5E7EB), width: 1.5)),
+                  borderSide: BorderSide(
+                      color: DC.border(ctx), width: 1.5)),
             ),
           ),
         ]),
       );
 
-  Widget _colorRow(String label, String value, ValueChanged<String> onChanged) {
+  Widget _colorRow(BuildContext ctx, String label, String value,
+      ValueChanged<String> onChanged) {
     final options = [
-      '#111827', '#6B7280', '#FFFFFF', '#6200EE', '#4F46E5', '#EF4444', '#10B981', '#F59E0B'
+      '#111827',
+      '#6B7280',
+      '#FFFFFF',
+      '#6200EE',
+      '#4F46E5',
+      '#EF4444',
+      '#10B981',
+      '#F59E0B'
     ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -814,10 +832,10 @@ class _EditorScreenState extends State<EditorScreen> {
         Padding(
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(label.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: Colors.grey,
+                  color: DC.muted(ctx),
                   letterSpacing: 0.8)),
         ),
         Wrap(spacing: 8, runSpacing: 8, children: options.map((c) {
@@ -831,7 +849,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 color: parseColor(c),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: sel ? const Color(0xFF4F46E5) : Colors.black12,
+                    color: sel ? AppTheme.primary : DC.border(ctx),
                     width: sel ? 3 : 1),
               ),
             ),
@@ -841,27 +859,26 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  Widget _segRow(String label, List<String> options, String value,
-          ValueChanged<String> onChanged) =>
+  Widget _segRow(BuildContext ctx, String label, List<String> options,
+          String value, ValueChanged<String> onChanged) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(label.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey,
+                    color: DC.muted(ctx),
                     letterSpacing: 0.8)),
           ),
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
+              color: DC.subtle(ctx),
               borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              border: Border.all(color: DC.border(ctx), width: 1.5),
             ),
             child: Row(children: options.map((o) {
               final on = o == value;
@@ -871,16 +888,15 @@ class _EditorScreenState extends State<EditorScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: on ? const Color(0xFF4F46E5) : Colors.transparent,
+                      color: on ? AppTheme.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(9),
                     ),
-                    child: Text(
-                        o[0].toUpperCase() + o.substring(1),
+                    child: Text(o[0].toUpperCase() + o.substring(1),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: on ? Colors.white : Colors.grey)),
+                            color: on ? Colors.white : DC.muted(ctx))),
                   ),
                 ),
               );
@@ -889,32 +905,33 @@ class _EditorScreenState extends State<EditorScreen> {
         ]),
       );
 
-  Widget _dropdown(String label, String value, List<ScreenModel> screens,
-          ValueChanged<String> onChanged) =>
+  Widget _dropdown(BuildContext ctx, String label, String value,
+          List<ScreenModel> screens, ValueChanged<String> onChanged) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(label.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey,
+                    color: DC.muted(ctx),
                     letterSpacing: 0.8)),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
+              color: DC.inputFill(ctx),
               borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              border: Border.all(color: DC.border(ctx), width: 1.5),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: screens.any((s) => s.id == value) ? value : '',
                 isExpanded: true,
+                dropdownColor: DC.surface(ctx),
+                style: TextStyle(color: DC.text(ctx)),
                 items: [
                   const DropdownMenuItem(value: '', child: Text('None')),
                   ...screens.map((s) =>
@@ -933,15 +950,20 @@ class _EditorScreenState extends State<EditorScreen> {
     final s = _project.screens[idx];
     final action = await showModalBottomSheet<String>(
         context: context,
+        backgroundColor: DC.surface(context),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         builder: (_) => Padding(
               padding: const EdgeInsets.all(22),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(s.name,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w800)),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: DC.text(context))),
                 const SizedBox(height: 4),
                 Text('Screen ${idx + 1} of ${_project.screens.length}',
-                    style: const TextStyle(color: Colors.grey)),
+                    style: TextStyle(color: DC.muted(context))),
                 const SizedBox(height: 16),
                 ListTile(
                     leading: const Icon(Icons.edit),
@@ -956,10 +978,9 @@ class _EditorScreenState extends State<EditorScreen> {
                     title: const Text('Set as start'),
                     onTap: () => Navigator.pop(context, 'start')),
                 ListTile(
-                    leading: const Icon(Icons.delete,
-                        color: Color(0xFFEF4444)),
+                    leading: const Icon(Icons.delete, color: AppTheme.danger),
                     title: const Text('Delete',
-                        style: TextStyle(color: Color(0xFFEF4444))),
+                        style: TextStyle(color: AppTheme.danger)),
                     onTap: () => Navigator.pop(context, 'delete')),
               ]),
             ));

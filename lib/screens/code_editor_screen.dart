@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../exporter.dart';
 import '../models.dart';
+import '../theme.dart';
 
 class CodeEditorScreen extends StatefulWidget {
   final Project project;

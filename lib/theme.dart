@@ -1,5 +1,39 @@
 import 'package:flutter/material.dart';
 
+/// Theme-aware colors that flip automatically with dark / light mode.
+class DC {
+  static bool _dark(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.dark;
+
+  /// Card / sheet surface.
+  static Color surface(BuildContext c) =>
+      _dark(c) ? const Color(0xFF1E293B) : Colors.white;
+
+  /// Scaffold background.
+  static Color bg(BuildContext c) =>
+      _dark(c) ? const Color(0xFF0F172A) : const Color(0xFFF5F6FA);
+
+  /// Primary text.
+  static Color text(BuildContext c) =>
+      _dark(c) ? const Color(0xFFF1F5F9) : const Color(0xFF111827);
+
+  /// Muted / secondary text.
+  static Color muted(BuildContext c) =>
+      _dark(c) ? const Color(0xFF94A3B8) : const Color(0xFF6B7280);
+
+  /// Borders and dividers.
+  static Color border(BuildContext c) =>
+      _dark(c) ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
+
+  /// Input fields, secondary surfaces.
+  static Color inputFill(BuildContext c) =>
+      _dark(c) ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB);
+
+  /// Chip / tag backgrounds.
+  static Color subtle(BuildContext c) =>
+      _dark(c) ? const Color(0xFF334155) : const Color(0xFFF5F6FA);
+}
+
 class AppTheme {
   static const primary = Color(0xFF4F46E5);
   static const primaryLight = Color(0xFFEEF2FF);
@@ -35,6 +69,12 @@ class AppTheme {
           fontWeight: FontWeight.w800,
           fontFamily: font,
         ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(builders: {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),

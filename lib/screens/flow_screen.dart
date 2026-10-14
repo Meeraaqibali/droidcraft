@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models.dart';
+import '../theme.dart';
 
 class FlowScreen extends StatefulWidget {
   final Project project;
@@ -26,11 +27,14 @@ class _FlowScreenState extends State<FlowScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         children: [
-          const Text('Design your navigation flow',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          Text('Design your navigation flow',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: DC.text(context))),
           const SizedBox(height: 4),
-          const Text('Long-press the handle to drag a screen. Order rebuilds the chain.',
-              style: TextStyle(color: Colors.grey, fontSize: 12)),
+          Text('Long-press the handle to drag a screen. Order rebuilds the chain.',
+              style: TextStyle(color: DC.muted(context), fontSize: 12)),
           const SizedBox(height: 20),
           ReorderableListView.builder(
             shrinkWrap: true,
@@ -77,16 +81,16 @@ class _FlowScreenState extends State<FlowScreen> {
             Container(
               width: 2,
               height: 20,
-              color: connected ? const Color(0xFF4F46E5) : const Color(0xFFE5E7EB),
+              color: connected ? AppTheme.primary : DC.border(context),
             ),
           ]),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: DC.surface(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isFirst ? const Color(0xFF4F46E5) : const Color(0xFFE5E7EB),
+              color: isFirst ? AppTheme.primary : DC.border(context),
               width: 1.5,
             ),
             boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 6)],
@@ -95,10 +99,12 @@ class _FlowScreenState extends State<FlowScreen> {
             Row(children: [
               CircleAvatar(
                 radius: 15,
-                backgroundColor: isFirst ? const Color(0xFF4F46E5) : const Color(0xFFEEF2FF),
+                backgroundColor: isFirst
+                    ? AppTheme.primary
+                    : AppTheme.primary.withOpacity(0.12),
                 child: Text('${i + 1}',
                     style: TextStyle(
-                      color: isFirst ? Colors.white : const Color(0xFF4F46E5),
+                      color: isFirst ? Colors.white : AppTheme.primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                     )),
@@ -106,13 +112,17 @@ class _FlowScreenState extends State<FlowScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(s.name,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: DC.text(context))),
               ),
               if (isFirst)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5),
+                    color: AppTheme.primary,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text('START',
@@ -125,25 +135,26 @@ class _FlowScreenState extends State<FlowScreen> {
               const SizedBox(width: 6),
               ReorderableDragStartListener(
                 index: i,
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.drag_indicator, color: Colors.grey, size: 22),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child:
+                      Icon(Icons.drag_indicator, color: DC.muted(context), size: 22),
                 ),
               ),
             ]),
             const SizedBox(height: 10),
             Row(children: [
-              const Icon(Icons.widgets_outlined, size: 14, color: Colors.grey),
+              Icon(Icons.widgets_outlined, size: 14, color: DC.muted(context)),
               const SizedBox(width: 6),
               Text('${s.components.length} widget${s.components.length == 1 ? '' : 's'}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  style: TextStyle(fontSize: 12, color: DC.muted(context))),
               const Spacer(),
               GestureDetector(
                 onTap: () => _renameScreen(s),
                 child: const Text('Rename',
                     style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF4F46E5),
+                        color: AppTheme.primary,
                         fontWeight: FontWeight.w700)),
               ),
               const SizedBox(width: 12),
@@ -151,23 +162,25 @@ class _FlowScreenState extends State<FlowScreen> {
                 GestureDetector(
                   onTap: () => _deleteScreen(s),
                   child: const Icon(Icons.delete_outline,
-                      size: 16, color: Color(0xFFEF4444)),
+                      size: 16, color: AppTheme.danger),
                 ),
             ]),
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6FA),
+                color: DC.subtle(context),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: DC.border(context)),
               ),
               child: Row(children: [
-                const Icon(Icons.arrow_forward, size: 15, color: Color(0xFF4F46E5)),
+                const Icon(Icons.arrow_forward, size: 15, color: AppTheme.primary),
                 const SizedBox(width: 8),
-                const Text('Goes to',
+                Text('Goes to',
                     style: TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: DC.muted(context))),
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropdownButtonHideUnderline(
@@ -175,11 +188,14 @@ class _FlowScreenState extends State<FlowScreen> {
                       value: screens.any((x) => x.id == s.next) ? s.next : null,
                       isExpanded: true,
                       isDense: true,
+                      dropdownColor: DC.surface(context),
+                      style: TextStyle(color: DC.text(context), fontSize: 13),
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                             value: null,
                             child: Text('(end of flow)',
-                                style: TextStyle(fontSize: 13, color: Colors.grey))),
+                                style: TextStyle(
+                                    fontSize: 13, color: DC.muted(context)))),
                         ...screens
                             .where((x) => x.id != s.id)
                             .map((x) => DropdownMenuItem(
@@ -211,7 +227,9 @@ class _FlowScreenState extends State<FlowScreen> {
         title: const Text('Rename screen'),
         content: TextField(controller: ctrl, autofocus: true),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () {
               final v = ctrl.text.trim();
@@ -250,7 +268,9 @@ class _FlowScreenState extends State<FlowScreen> {
           decoration: const InputDecoration(hintText: 'e.g. Home, Profile'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () {
               final name = ctrl.text.trim();
