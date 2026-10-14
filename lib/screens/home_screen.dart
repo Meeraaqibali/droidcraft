@@ -139,7 +139,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
             childAspectRatio: 1.35,
-            children: ideas.map((idea) => _ideaCard(ctx, idea)).toList(),
+            children: ideas.map((idea) => _ideaCard(context, idea)).toList(),
           ),
           const SizedBox(height: 26),
           _sectionTitle(context, 'YOUR PROJECTS'),
