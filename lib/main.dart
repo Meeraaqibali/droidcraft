@@ -26,8 +26,8 @@ class DroidCraftApp extends StatelessWidget {
     return MaterialApp(
       title: 'DroidCraft',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppTheme.light(theme.font),
+      darkTheme: AppTheme.dark(theme.font),
       themeMode: theme.mode,
       home: const HomeScreen(),
     );
