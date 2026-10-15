@@ -37,16 +37,16 @@ class _FlowScreenState extends State<FlowScreen> {
               style: TextStyle(color: DC.muted(context), fontSize: 12)),
           const SizedBox(height: 20),
           AnimatedSize(
-            duration: const Duration(milliseconds: 350),
+            duration: const Duration(milliseconds: 550),
             curve: Curves.easeOutCubic,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeIn,
+              duration: const Duration(milliseconds: 550),
+              switchInCurve: Curves.easeInOutCubic,
+              switchOutCurve: Curves.easeInOutCubic,
               transitionBuilder: (child, anim) => FadeTransition(
                 opacity: anim,
                 child: SlideTransition(
-                  position: Tween(begin: const Offset(0, 0.05), end: Offset.zero)
+                  position: Tween(begin: const Offset(0, 0.12), end: Offset.zero)
                       .chain(CurveTween(curve: Curves.easeOutCubic))
                       .animate(anim),
                   child: child,

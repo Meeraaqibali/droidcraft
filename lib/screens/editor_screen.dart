@@ -318,6 +318,7 @@ class _EditorScreenState extends State<EditorScreen> {
               title: _screen.name,
               screenBg: parseColor(_screen.bg, Colors.white),
               barBg: parseColor(_screen.barBg, const Color(0xFF6200EE)),
+              barTextColor: parseColor(_screen.barTextColor, Colors.white),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: _screen.components.isEmpty
@@ -803,6 +804,55 @@ class _EditorScreenState extends State<EditorScreen> {
                         22,
                         (v) => setSt(() => props['lineHeight'] =
                             double.parse(v.toStringAsFixed(1)))),
+                  if (def.fields.contains('bg'))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('Gradient background',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: DC.text(ctx))),
+                        subtitle: Text('Blend to a second color',
+                            style: TextStyle(fontSize: 11, color: DC.muted(ctx))),
+                        value: props['gradient'] == true,
+                        activeColor: AppTheme.primary,
+                        onChanged: (v) => setSt(() => props['gradient'] = v),
+                      ),
+                    ),
+                  if (def.fields.contains('bg') && props['gradient'] == true)
+                    _colorRow(ctx, 'Gradient end',
+                        props['gradientColor']?.toString() ?? '#7C3AED',
+                        (v) => setSt(() => props['gradientColor'] = v)),
+                  if (def.fields.contains('radius'))
+                    _sliderRow(
+                        ctx,
+                        'Shadow',
+                        '${(props['shadow'] ?? 0).toInt()}',
+                        ((props['shadow'] ?? 0) as num).toDouble(),
+                        0,
+                        20,
+                        20,
+                        (v) => setSt(() => props['shadow'] = v.round())),
+                  if (def.fields.contains('radius'))
+                    _sliderRow(
+                        ctx,
+                        'Border width',
+                        '${(props['borderWidth'] ?? 0).toInt()}px',
+                        ((props['borderWidth'] ?? 0) as num).toDouble(),
+                        0,
+                        6,
+                        6,
+                        (v) => setSt(() => props['borderWidth'] = v.round())),
+                  if (def.fields.contains('radius') &&
+                      (props['borderWidth'] as num?) != null &&
+                      (props['borderWidth'] as num) > 0)
+                    _colorRow(ctx, 'Border color',
+                        props['borderColor']?.toString() ?? '#6B7280',
+                        (v) => setSt(() => props['borderColor'] = v)),
+                  if (def.fields.contains('bold'))
+                    _fontRow(ctx, props, setSt),
                   if (def.fields.contains('on'))
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -941,6 +991,52 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
+  Widget _fontRow(BuildContext ctx, Map<String, dynamic> props, void Function(void Function()) setSt) {
+    const fonts = {
+      'Roboto': 'Roboto',
+      'Serif': 'serif',
+      'Monospace': 'monospace',
+      'Condensed': 'sans-serif-condensed',
+      'Cursive': 'cursive',
+    };
+    final current = (props['fontFamily'] ?? 'Roboto').toString();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text('FONT FAMILY',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: DC.muted(ctx),
+                  letterSpacing: 0.8)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: DC.inputFill(ctx),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: DC.border(ctx), width: 1.5),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: current,
+              isExpanded: true,
+              dropdownColor: DC.surface(ctx),
+              style: TextStyle(color: DC.text(ctx), fontSize: 14),
+              items: fonts.entries.map((e) => DropdownMenuItem(
+                value: e.value,
+                child: Text(e.key, style: TextStyle(fontFamily: e.value, fontSize: 14)),
+              )).toList(),
+              onChanged: (v) => setSt(() => props['fontFamily'] = v ?? 'Roboto'),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
   Widget _styleToggle(BuildContext ctx, String label, IconData icon, bool on,
       VoidCallback onTap) {
     return InkWell(
@@ -1011,14 +1107,11 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget _colorRow(BuildContext ctx, String label, String value,
       ValueChanged<String> onChanged) {
     final options = [
-      '#111827',
-      '#6B7280',
-      '#FFFFFF',
-      '#6200EE',
-      '#4F46E5',
-      '#EF4444',
-      '#10B981',
-      '#F59E0B'
+      '#111827', '#6B7280', '#FFFFFF', '#6200EE',
+      '#4F46E5', '#EF4444', '#10B981', '#F59E0B',
+      '#EC4899', '#F97316', '#14B8A6', '#06B6D4',
+      '#8B5CF6', '#0EA5E9', '#FDE68A', '#FCE7F3',
+      '#DBEAFE', '#D1FAE5', '#000000', '#F5F6FA',
     ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -1224,6 +1317,10 @@ class _EditorScreenState extends State<EditorScreen> {
                     title: const Text('App bar color'),
                     onTap: () => Navigator.pop(context, 'barBg')),
                 ListTile(
+                    leading: const Icon(Icons.text_fields_outlined),
+                    title: const Text('App bar text color'),
+                    onTap: () => Navigator.pop(context, 'barTextColor')),
+                ListTile(
                     leading: const Icon(Icons.edit),
                     title: const Text('Rename'),
                     onTap: () => Navigator.pop(context, 'rename')),
@@ -1253,6 +1350,12 @@ class _EditorScreenState extends State<EditorScreen> {
       final pick = await _pickScreenColor(s.barBg);
       if (pick != null) {
         setState(() => s.barBg = pick);
+        _persist();
+      }
+    } else if (action == 'barTextColor') {
+      final pick = await _pickScreenColor(s.barTextColor);
+      if (pick != null) {
+        setState(() => s.barTextColor = pick);
         _persist();
       }
     } else if (action == 'rename') {

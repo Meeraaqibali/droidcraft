@@ -28,6 +28,7 @@ class ScreenModel {
   String? next;
   String bg;
   String barBg;
+  String barTextColor;
   List<ComponentModel> components;
   Map<String, String> codeOverrides;
 
@@ -37,6 +38,7 @@ class ScreenModel {
     this.next,
     this.bg = '#FFFFFF',
     this.barBg = '#6200EE',
+    this.barTextColor = '#FFFFFF',
     List<ComponentModel>? components,
     Map<String, String>? codeOverrides,
   })  : components = components ?? [],
@@ -48,6 +50,7 @@ class ScreenModel {
         next: j['next'] as String?,
         bg: (j['bg'] as String?) ?? '#FFFFFF',
         barBg: (j['barBg'] as String?) ?? '#6200EE',
+        barTextColor: (j['barTextColor'] as String?) ?? '#FFFFFF',
         components: (j['components'] as List? ?? [])
             .map((e) => ComponentModel.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
@@ -62,6 +65,7 @@ class ScreenModel {
         'next': next,
         'bg': bg,
         'barBg': barBg,
+        'barTextColor': barTextColor,
         'components': components.map((c) => c.toJson()).toList(),
         'codeOverrides': codeOverrides,
       };
@@ -72,6 +76,7 @@ class ScreenModel {
         next: null,
         bg: bg,
         barBg: barBg,
+        barTextColor: barTextColor,
         components: components.map((c) => c.clone()).toList(),
         codeOverrides: Map.from(codeOverrides),
       );

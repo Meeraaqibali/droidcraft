@@ -41,6 +41,48 @@ BoxFit _fitOf(String? f) {
   }
 }
 
+
+Color? _shadowColor(Map<String, dynamic> p) {
+  final v = (p['shadow'] as num?)?.toDouble() ?? 0;
+  if (v <= 0) return null;
+  return Color.fromRGBO(0, 0, 0, (v * 0.02).clamp(0.0, 0.5));
+}
+
+double _shadowRadius(Map<String, dynamic> p) =>
+    ((p['shadow'] as num?)?.toDouble() ?? 0) * 1.5;
+
+String _fontFamily(Map<String, dynamic> p) {
+  final v = (p['fontFamily'] ?? '').toString();
+  return v.isEmpty ? 'Roboto' : v;
+}
+
+bool _hasGradient(Map<String, dynamic> p) => p['gradient'] == true;
+
+BoxDecoration _bgDeco(Map<String, dynamic> p, double radius, {Color? fallback}) {
+  final c1 = parseColor(p['bg'], fallback ?? const Color(0xFF6200EE));
+  final c2 = parseColor(p['gradientColor'], const Color(0xFF7C3AED));
+  return BoxDecoration(
+    color: _hasGradient(p) ? null : c1,
+    gradient: _hasGradient(p)
+        ? LinearGradient(
+            colors: [c1, c2],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : null,
+    borderRadius: BorderRadius.circular(radius),
+    boxShadow: _shadowColor(p) != null
+        ? [BoxShadow(color: _shadowColor(p)!, blurRadius: _shadowRadius(p), offset: Offset(0, _shadowRadius(p) / 3))]
+        : null,
+    border: (p['borderWidth'] as num?) != null && (p['borderWidth'] as num) > 0
+        ? Border.all(
+            color: parseColor(p['borderColor'], Colors.grey),
+            width: ((p['borderWidth'] as num).toDouble()),
+          )
+        : null,
+  );
+}
+
 TextStyle _textStyle(Map<String, dynamic> p, Color color, double size, {double? defaultWeight}) {
   final bold = p['bold'] == true;
   final italic = p['italic'] == true;
@@ -48,6 +90,7 @@ TextStyle _textStyle(Map<String, dynamic> p, Color color, double size, {double? 
   return TextStyle(
     color: color,
     fontSize: size,
+    fontFamily: _fontFamily(p),
     height: (p['lineHeight'] as num?)?.toDouble() ?? 1.4,
     letterSpacing: (p['letterSpacing'] as num?)?.toDouble() ?? 0,
     fontWeight: bold ? FontWeight.w800 : (defaultWeight != null ? FontWeight.w700 : FontWeight.normal),
@@ -94,11 +137,7 @@ class ComponentRenderer extends StatelessWidget {
               horizontal: 26 + _pad(p, 0),
               vertical: 12 + _pad(p, 0),
             ),
-            decoration: BoxDecoration(
-              color: parseColor(p['bg'], const Color(0xFF6200EE)),
-              borderRadius: BorderRadius.circular(_rad(p, 10)),
-              boxShadow: const [BoxShadow(color: Color(0x476200EE), blurRadius: 12, offset: Offset(0, 4))],
-            ),
+            decoration: _bgDeco(p, _rad(p, 10), fallback: const Color(0xFF6200EE)),
             child: Text(p['text']?.toString() ?? 'Button',
                 style: TextStyle(
                   color: color,
@@ -317,10 +356,7 @@ class ComponentRenderer extends StatelessWidget {
               horizontal: 16 + _pad(p, 0),
               vertical: 7 + _pad(p, 0),
             ),
-            decoration: BoxDecoration(
-              color: parseColor(p['bg'], const Color(0xFF6200EE)),
-              borderRadius: BorderRadius.circular(_rad(p, 16)),
-            ),
+            decoration: _bgDeco(p, _rad(p, 16), fallback: const Color(0xFF6200EE)),
             child: Text(p['text']?.toString() ?? 'Chip',
                 style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
           ),

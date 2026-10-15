@@ -5,6 +5,7 @@ class PhoneFrame extends StatelessWidget {
   final Widget child;
   final Color? screenBg;
   final Color? barBg;
+  final Color? barTextColor;
   final bool statusBar;
   const PhoneFrame({
     super.key,
@@ -12,6 +13,7 @@ class PhoneFrame extends StatelessWidget {
     required this.child,
     this.screenBg,
     this.barBg,
+    this.barTextColor,
     this.statusBar = true,
   });
 
@@ -57,8 +59,10 @@ class PhoneFrame extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 color: barBg ?? const Color(0xFF6200EE),
                 child: Text(title,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                    style: TextStyle(
+                        color: barTextColor ?? Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600)),
               ),
               Container(color: bg, child: child),
             ],
